@@ -18,7 +18,7 @@ public class TransformationP6 implements Transformation {
     private static final String SIMPLE_VERTEX_2 = "vertex2";
 
 
-    private Map<String, Vertex> mapVerticesToModel(ModelGraph graph, InteriorNode interiorNode){
+    private Map<String, Vertex> mapVerticesToModel(ModelGraph graph, InteriorNode interiorNode) {
         Map<String, Vertex> verticesMap = new HashMap<>();
 
         Triplet<Vertex, Vertex, Vertex> triangleSimple = interiorNode.getTriangleVertexes();
@@ -30,19 +30,19 @@ public class TransformationP6 implements Transformation {
         Vertex vertexE = graph.getVertexBetween(vertexB, vertexC).orElse(null);
         Vertex vertexF = graph.getVertexBetween(vertexA, vertexC).orElse(null);
 
-        if(vertexD == null){
+        if (vertexD == null) {
             verticesMap.put(SIMPLE_VERTEX_1, vertexA);
             verticesMap.put(SIMPLE_VERTEX_5, vertexB);
             verticesMap.put(SIMPLE_VERTEX_3, vertexC);
         }
 
-        if(vertexE == null){
+        if (vertexE == null) {
             verticesMap.put(SIMPLE_VERTEX_1, vertexB);
             verticesMap.put(SIMPLE_VERTEX_5, vertexC);
             verticesMap.put(SIMPLE_VERTEX_3, vertexA);
         }
 
-        if(vertexF == null){
+        if (vertexF == null) {
             verticesMap.put(SIMPLE_VERTEX_1, vertexA);
             verticesMap.put(SIMPLE_VERTEX_5, vertexC);
             verticesMap.put(SIMPLE_VERTEX_3, vertexB);
@@ -53,11 +53,10 @@ public class TransformationP6 implements Transformation {
         Vertex hanging2;
         Vertex hanging4;
 
-        if(verticesMap.get(SIMPLE_VERTEX_1).getEdgeBetween(hangingNodes.get(0)) != null){
+        if (verticesMap.get(SIMPLE_VERTEX_1).getEdgeBetween(hangingNodes.get(0)) != null) {
             hanging2 = hangingNodes.get(0);
             hanging4 = hangingNodes.get(1);
-        }
-        else{
+        } else {
             hanging2 = hangingNodes.get(1);
             hanging4 = hangingNodes.get(0);
         }
@@ -69,15 +68,15 @@ public class TransformationP6 implements Transformation {
     }
 
     @Override
-    public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode){
+    public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
         List<Vertex> hangingNodes = interiorNode.getAssociatedNodes();
 
-        if(hangingNodes.size() != 2){
+        if (hangingNodes.size() != 2) {
             return false;
         }
         Map<String, Vertex> verticesMap = this.mapVerticesToModel(graph, interiorNode);
 
-        if(verticesMap.size() != 5){
+        if (verticesMap.size() != 5) {
             System.out.println(verticesMap.size());
             return false;
         }
@@ -89,22 +88,19 @@ public class TransformationP6 implements Transformation {
             return false;
         }
 
-        GraphEdge e1 = graph.getEdgeBetweenNodes(verticesMap.get(SIMPLE_VERTEX_1), verticesMap.get(HANGING_NODE_2))
-                .orElseThrow(() -> new IllegalStateException("Unknown vertices"));
+        GraphEdge e1 = tryGetEdge(graph, verticesMap, SIMPLE_VERTEX_1, HANGING_NODE_2);
+        GraphEdge e2 = tryGetEdge(graph, verticesMap, HANGING_NODE_2, SIMPLE_VERTEX_3);
+        GraphEdge e3 = tryGetEdge(graph, verticesMap, SIMPLE_VERTEX_3, HANGING_NODE_4);
+        GraphEdge e4 = tryGetEdge(graph, verticesMap, HANGING_NODE_4, SIMPLE_VERTEX_5);
+        GraphEdge e5 = tryGetEdge(graph, verticesMap, SIMPLE_VERTEX_1, SIMPLE_VERTEX_5);
 
-        GraphEdge e2 = graph.getEdgeBetweenNodes(verticesMap.get(HANGING_NODE_2), verticesMap.get(SIMPLE_VERTEX_3))
-                .orElseThrow(() -> new IllegalStateException("Unknown vertices"));
-
-        GraphEdge e3 = graph.getEdgeBetweenNodes(verticesMap.get(SIMPLE_VERTEX_3), verticesMap.get(HANGING_NODE_4))
-                .orElseThrow(() -> new IllegalStateException("Unknown vertices"));
-
-        GraphEdge e4 = graph.getEdgeBetweenNodes(verticesMap.get(HANGING_NODE_4), verticesMap.get(SIMPLE_VERTEX_5))
-                .orElseThrow(() -> new IllegalStateException("Unknown vertices"));
-
-        GraphEdge e5 = graph.getEdgeBetweenNodes(verticesMap.get(SIMPLE_VERTEX_1), verticesMap.get(SIMPLE_VERTEX_5))
-                .orElseThrow(() -> new IllegalStateException("Unknown vertices"));
-
+        // return condition (((L1 + L2) >= (L3+L4)) && ((L1+L2)>=(L5+L6)))
         return (e1.getL() + e2.getL() >= (e3.getL() + e4.getL())) && (e1.getL() + e2.getL() >= e5.getL());
+    }
+
+    private GraphEdge tryGetEdge(ModelGraph graph, Map<String, Vertex> verticesMap, String simpleVertex1, String hangingNode2) {
+        return graph.getEdgeBetweenNodes(verticesMap.get(simpleVertex1), verticesMap.get(hangingNode2))
+                .orElseThrow(() -> new IllegalStateException("Unknown vertices"));
     }
 
     @Override
@@ -112,7 +108,7 @@ public class TransformationP6 implements Transformation {
 
         Map<String, Vertex> verticesMap = this.mapVerticesToModel(graph, interiorNode);
 
-        if(this.isConditionCompleted(graph, interiorNode)){
+        if (this.isConditionCompleted(graph, interiorNode)) {
 
             graph.removeInterior(interiorNode.getId());
 
