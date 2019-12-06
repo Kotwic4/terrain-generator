@@ -4,11 +4,13 @@ import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import transformation.Transformation;
+import transformation.TransformationP1;
 import transformation.TransformationP2;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,6 +70,34 @@ public class TransformationP2Test extends AbstractTransformationTest {
         }
         assertTrue(graph.getEdgeBetweenNodes(graph.getVertex("v7").get(),graph.getVertex("v2").get()).isPresent());
         assertTrue(graph.getEdgeBetweenNodes(graph.getVertex("v6").get(),graph.getVertex("v4").get()).isPresent());
+
+    }
+    @Test
+    public void transformationTest(){
+        ModelGraph graph = createEmptyGraph();
+        Vertex v0 = graph.insertVertex("v0", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
+        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(100.0, 0.0, 0.0));
+        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(0.0, 100.0, 0.0));
+        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(100.0, 100.0, 0.0));
+
+        graph.insertEdge("e0", v0, v1, true);
+        graph.insertEdge("e1", v1, v3, true);
+        graph.insertEdge("e2", v0, v2, true);
+        graph.insertEdge("e3", v2, v3, true);
+        graph.insertEdge("e4", v0, v3, true);
+
+        graph.insertInterior("i1", v0, v1, v3);
+        graph.insertInterior("i2", v0, v2, v3);
+
+        Transformation t1 = new TransformationP1();
+        t1.transformGraph(graph, graph.getInterior("i2").get());
+
+        graph.display();
+        try {
+            TimeUnit.SECONDS.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
