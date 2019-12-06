@@ -9,14 +9,12 @@ import java.util.List;
 
 public class TransformationP6a implements Transformation {
 
-    private static class InvalidProduction extends IllegalStateException {
-    }
 
     @Override
     public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
         try {
             convertToProductionModel(graph, interiorNode);
-        } catch (InvalidProduction invalidProduction) {
+        } catch (Exception e) {
             return false;
         }
 
@@ -24,7 +22,7 @@ public class TransformationP6a implements Transformation {
     }
 
     private Pair<List<GraphEdge>, List<Vertex>>
-    convertToProductionModel(ModelGraph graph, InteriorNode interiorNode) throws InvalidProduction {
+    convertToProductionModel(ModelGraph graph, InteriorNode interiorNode) {
         Triplet<Vertex, Vertex, Vertex> triangle = interiorNode.getTriangle();
         Vertex v0 = triangle.getValue0();
         Vertex v2 = triangle.getValue1();
@@ -77,19 +75,19 @@ public class TransformationP6a implements Transformation {
     }
 
     private static GraphEdge getEdgeBetween(ModelGraph modelGraph, Vertex begin, Vertex end) {
-        return modelGraph.getEdgeBetweenNodes(begin, end).orElseThrow(InvalidProduction::new);
+        return modelGraph.getEdgeBetweenNodes(begin, end).orElseThrow(IllegalStateException::new);
     }
 
-    private Vertex getMiddleVertex(ModelGraph graph, Vertex begin, Vertex end) throws InvalidProduction {
+    private Vertex getMiddleVertex(ModelGraph graph, Vertex begin, Vertex end) {
         return graph.getVertexesBetween(begin, end)
                 .stream()
                 .filter(v -> v.getVertexType() == VertexType.HANGING_NODE)
                 .findAny()
-                .orElseThrow(InvalidProduction::new);
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Override
-    public ModelGraph transformGraph(ModelGraph graph, InteriorNode interiorNode) throws InvalidProduction {
+    public ModelGraph transformGraph(ModelGraph graph, InteriorNode interiorNode) {
         Vertex[] v = this.convertToProductionModel(graph, interiorNode).getValue1().toArray(new Vertex[0]);
 
         graph.removeInterior(interiorNode.getId());
