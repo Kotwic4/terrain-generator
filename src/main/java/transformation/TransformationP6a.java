@@ -1,150 +1,113 @@
 package transformation;
 
 import model.*;
+import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class TransformationP6a implements Transformation {
 
-    private static final String SIMPLE_VERTEX_1 = "vertex1";
-    private static final String SIMPLE_VERTEX_3 = "vertex3";
-    private static final String SIMPLE_VERTEX_5 = "vertex5";
-
-    private static final String HANGING_NODE_2 = "node2";
-    private static final String HANGING_NODE_4 = "node4";
-    private static final String HANGING_NODE_6 = "node6";
-
-    private static final String VERTEX_MAP_SIMPLE_VERTEX_OPPOSITE_LONGEST_EDGE_KEY = "oppositeLongestEdgeVertex3";
-
-    @Override
-    public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
-        Triplet<Vertex, Vertex, Vertex> triangle = interiorNode.getTriangleVertexes();
-        if(!interiorNode.isPartitionRequired()){
-            return false;
-        }
-        if(getSimpleVertexCount(triangle) != 3 || getHangingVertexCount(triangle) != 0){
-            return false;
-        }
-
-        Map<String, Vertex> model = mapTriangleVertexesToModel(graph, interiorNode);
-
-        Vertex simpleVertex1 = model.get(SIMPLE_VERTEX_1);
-        Vertex simpleVertex2 = model.get(SIMPLE_VERTEX_3);
-        Vertex oppositeLongestEdgeVertex = model.get(VERTEX_MAP_SIMPLE_VERTEX_OPPOSITE_LONGEST_EDGE_KEY);
-
-        if(simpleVertex1 == null || simpleVertex2 == null || oppositeLongestEdgeVertex == null){
-            throw new RuntimeException("Transformation error");
-        }
-
-        GraphEdge longestEdge = graph.getEdgeBetweenNodes(simpleVertex1, simpleVertex2)
-                .orElseThrow(() -> new RuntimeException("Unknown edge id"));
-        GraphEdge shortEdge1 = graph.getEdgeBetweenNodes(oppositeLongestEdgeVertex, simpleVertex1)
-                .orElseThrow(() -> new RuntimeException("Unknown edge id"));
-        GraphEdge shortEdge2 = graph.getEdgeBetweenNodes(oppositeLongestEdgeVertex, simpleVertex2)
-                .orElseThrow(() -> new RuntimeException("Unknown edge id"));
-
-        if(!longestEdge.getB()){
-            return false;
-        }
-
-        if(longestEdge.getL() < shortEdge1.getL() || longestEdge.getL() < shortEdge2.getL()){
-            return false;
-        }
-        return true;
+    private static class InvalidProduction extends IllegalStateException {
     }
 
     @Override
-    public ModelGraph transformGraph(ModelGraph graph, InteriorNode interiorNode) {
-        Map<String, Vertex> model = mapTriangleVertexesToModel(graph, interiorNode);
-        Vertex simpleVertex1 = model.get(SIMPLE_VERTEX_1);
-        Vertex simpleVertex2 = model.get(SIMPLE_VERTEX_3);
-        Vertex oppositeLongestEdgeVertex = model.get(SIMPLE_VERTEX_5); //VERTEX_MAP_SIMPLE_VERTEX_OPPOSITE_LONGEST_EDGE_KEY
-
-        if(simpleVertex1 == null || simpleVertex2 == null || oppositeLongestEdgeVertex == null){
-            throw new RuntimeException("Transformation error");
+    public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
+        try {
+            convertToProductionModel(graph, interiorNode);
+        } catch (InvalidProduction invalidProduction) {
+            return false;
         }
 
+        return true;
+    }
+
+    private Pair<List<GraphEdge>, List<Vertex>>
+    convertToProductionModel(ModelGraph graph, InteriorNode interiorNode) throws InvalidProduction {
+        Triplet<Vertex, Vertex, Vertex> triangle = interiorNode.getTriangle();
+        Vertex v0 = triangle.getValue0();
+        Vertex v2 = triangle.getValue1();
+        Vertex v4 = triangle.getValue2();
+        Vertex v1 = this.getMiddleVertex(graph, v0, v2);
+        Vertex v3 = this.getMiddleVertex(graph, v2, v4);
+        Vertex v5 = this.getMiddleVertex(graph, v4, v0);
+
+        LinkedList<Vertex> vertices = new LinkedList<>();
+        vertices.add(v0);
+        vertices.add(v1);
+        vertices.add(v2);
+        vertices.add(v3);
+        vertices.add(v4);
+        vertices.add(v5);
+
+        GraphEdge e0 = getEdgeBetween(graph, v0, v1);
+        GraphEdge e1 = getEdgeBetween(graph, v1, v2);
+        GraphEdge e2 = getEdgeBetween(graph, v2, v3);
+        GraphEdge e3 = getEdgeBetween(graph, v3, v4);
+        GraphEdge e4 = getEdgeBetween(graph, v4, v5);
+        GraphEdge e5 = getEdgeBetween(graph, v5, v0);
+
+        LinkedList<GraphEdge> edges = new LinkedList<>();
+        edges.add(e0);
+        edges.add(e1);
+        edges.add(e2);
+        edges.add(e3);
+        edges.add(e4);
+        edges.add(e5);
+
+        double base0 = e0.getL() + e1.getL();
+        double base1 = e2.getL() + e3.getL();
+        double base2 = e4.getL() + e5.getL();
+
+        if (base1 > base0 && base1 > base2) {
+            vertices.addLast(vertices.removeFirst());
+            vertices.addLast(vertices.removeFirst());
+            edges.addLast(edges.removeFirst());
+            edges.addLast(edges.removeFirst());
+
+        } else if (base2 > base0 && base2 > base1) {
+            vertices.addFirst(vertices.removeLast());
+            vertices.addFirst(vertices.removeLast());
+            edges.addFirst(edges.removeLast());
+            edges.addFirst(edges.removeLast());
+        }
+
+        return Pair.with(edges, vertices);
+    }
+
+    private static GraphEdge getEdgeBetween(ModelGraph modelGraph, Vertex begin, Vertex end) {
+        return modelGraph.getEdgeBetweenNodes(begin, end).orElseThrow(InvalidProduction::new);
+    }
+
+    private Vertex getMiddleVertex(ModelGraph graph, Vertex begin, Vertex end) throws InvalidProduction {
+        return graph.getVertexesBetween(begin, end)
+                .stream()
+                .filter(v -> v.getVertexType() == VertexType.HANGING_NODE)
+                .findAny()
+                .orElseThrow(InvalidProduction::new);
+    }
+
+    @Override
+    public ModelGraph transformGraph(ModelGraph graph, InteriorNode interiorNode) throws InvalidProduction {
+        Vertex[] v = this.convertToProductionModel(graph, interiorNode).getValue1().toArray(new Vertex[0]);
+
         graph.removeInterior(interiorNode.getId());
+        graph.insertInterior(this.generateId(v[0], v[1], v[4]), v[0], v[1], v[4]);
+        graph.insertInterior(this.generateId(v[1], v[2], v[4]), v[1], v[2], v[4]);
 
-        Vertex insertedVertex = graph.insertVertex(interiorNode.getId(),
-                VertexType.SIMPLE_NODE,
-                Point3d.middlePoint(simpleVertex1.getCoordinates(), simpleVertex2.getCoordinates()));
-
-        String newEdge1Id = simpleVertex1.getId().concat(insertedVertex.getId());
-        String newEdge2Id = simpleVertex2.getId().concat(insertedVertex.getId());
-        String newEdge3Id = oppositeLongestEdgeVertex.getId().concat(insertedVertex.getId());
-
-        GraphEdge insertedEdge1 = graph.insertEdge(newEdge1Id, simpleVertex1, insertedVertex);
-        insertedEdge1.setB(false);
-        // insertedEdge1.setB(longestEdge.getB());
-
-        GraphEdge insertedEdge2 = graph.insertEdge(newEdge2Id, simpleVertex2, insertedVertex);
-        insertedEdge2.setB(false);
-       // insertedEdge2.setB(longestEdge.getB());
-
-        GraphEdge insertedEdge3 = graph.insertEdge(newEdge3Id, oppositeLongestEdgeVertex, insertedVertex);
-        insertedEdge3.setB(false);
-
-        String insertedInterior1Id = oppositeLongestEdgeVertex.getId().concat(simpleVertex1.getId()).concat(insertedVertex.getId());
-        String insertedInterior2Id = oppositeLongestEdgeVertex.getId().concat(simpleVertex2.getId()).concat(insertedVertex.getId());
-        graph.insertInterior(insertedInterior1Id, oppositeLongestEdgeVertex, simpleVertex1,  insertedVertex);
-        graph.insertInterior(insertedInterior2Id, oppositeLongestEdgeVertex, simpleVertex2,  insertedVertex);
-
-        graph.deleteEdge(simpleVertex1, model.get(HANGING_NODE_2));
-        graph.deleteEdge(model.get(HANGING_NODE_2), simpleVertex2);
-
-        graph.removeVertex(model.get(HANGING_NODE_2).getSymbol());
+        GraphEdge edge = graph.insertEdge(this.generateId(v[1], v[4]), v[1], v[4]);
+        edge.setB(false);
+        v[1].setVertexType(VertexType.SIMPLE_NODE);
 
         return graph;
     }
 
-    private static Map<String, Vertex> mapTriangleVertexesToModel(ModelGraph graph, InteriorNode interiorNode){
-        Map<String, Vertex> verticesMap = new HashMap<>();
-
-        Triplet<Vertex, Vertex, Vertex> triangleSimple = interiorNode.getTriangleVertexes();
-        Vertex vertexA = triangleSimple.getValue0();
-        Vertex vertexB = triangleSimple.getValue1();
-        Vertex vertexC = triangleSimple.getValue2();
-
-        List<Vertex> hangingNodes = interiorNode.getAssociatedNodes();
-
-        Vertex hanging2 = hangingNodes.get(0);
-        Vertex hanging4 = hangingNodes.get(1);
-        Vertex hanging6 = hangingNodes.get(2);
-
-        verticesMap.put(HANGING_NODE_2, hanging2);
-        verticesMap.put(HANGING_NODE_4, hanging4);
-        verticesMap.put(HANGING_NODE_6, hanging6);
-
-        verticesMap.put(SIMPLE_VERTEX_1, vertexA);
-        verticesMap.put(SIMPLE_VERTEX_3, vertexB);
-        verticesMap.put(SIMPLE_VERTEX_5, vertexC);
-
-        return verticesMap;
+    private String generateId(Vertex v1, Vertex v2, Vertex v3) {
+        return v1.getId().concat(v2.getId()).concat(v3.getId());
     }
 
-    private static int getSimpleVertexCount(Triplet<Vertex, Vertex, Vertex> triangle) {
-        int count = 0;
-        for (Object o : triangle) {
-            Vertex v = (Vertex)o;
-            if(v.getVertexType() == VertexType.SIMPLE_NODE){
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private static int getHangingVertexCount(Triplet<Vertex, Vertex, Vertex> triangle) {
-        int count = 0;
-        for (Object o : triangle) {
-            Vertex v = (Vertex)o;
-            if(v.getVertexType() == VertexType.HANGING_NODE){
-                count++;
-            }
-        }
-        return count;
+    private String generateId(Vertex v1, Vertex v2) {
+        return v1.getId().concat(v2.getId());
     }
 }
