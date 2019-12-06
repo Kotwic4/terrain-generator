@@ -15,8 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TransformationP6aTest extends AbstractTransformationTest {
     private Transformation transformation = new TransformationP6a();
 
+    // SIMPLE GRAPH TESTS
     @Test
-    public void simpleGraphHangingNode() {
+    public void simpleGraphShouldHaveCorrectHangingNodesCountAfterTransformation() {
         Pair<ModelGraph, InteriorNode> simplestGraph = this.createSimplestGraph();
         ModelGraph graph = simplestGraph.getValue0();
         InteriorNode interiorNode = simplestGraph.getValue1();
@@ -28,7 +29,7 @@ public class TransformationP6aTest extends AbstractTransformationTest {
     }
 
     @Test
-    public void simpleGraphInteriorNumber() {
+    public void simpleGraphShouldHaveCorrectInteriorNodesCountAfterTransformation() {
         Pair<ModelGraph, InteriorNode> simplestGraph = this.createSimplestGraph();
         ModelGraph graph = simplestGraph.getValue0();
         InteriorNode interiorNode = simplestGraph.getValue1();
@@ -39,34 +40,34 @@ public class TransformationP6aTest extends AbstractTransformationTest {
         assertEquals(2, graph.getInteriors().size());
     }
 
+    // ENVELOPE GRAPH TESTS
     @Test
     public void envelopeGraphConditionCompletion() {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
 
         for (Map.Entry<InteriorNode, Boolean> entry : graphPair.getValue1().entrySet()) {
-            System.out.println("Testing for interior node with id: " + entry.getKey().getId());
             assertEquals(entry.getValue(), transformation.isConditionCompleted(graphPair.getValue0(), entry.getKey()));
         }
     }
 
     @Test
-    public void envelopeGraphHangingNodesCount() {
+    public void shouldHaveCorrectHangingNodesCountAfterTransformation() {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
         ModelGraph graph = graphPair.getValue0();
 
         assertEquals(3, getHangingNodeSize(graph));
         for (Map.Entry<InteriorNode, Boolean> entry : graphPair.getValue1().entrySet()) {
-            InteriorNode iNode = entry.getKey();
+            InteriorNode interiorNode = entry.getKey();
 
-            if (transformation.isConditionCompleted(graph, iNode)) {
-                transformation.transformGraph(graph, iNode);
+            if (transformation.isConditionCompleted(graph, interiorNode)) {
+                transformation.transformGraph(graph, interiorNode);
             }
         }
         assertEquals(2, getHangingNodeSize(graph));
     }
 
     @Test
-    public void envelopeGraphInternalNodesCount() {
+    public void shouldHaveCorrectInteriorNodesCountAfterTransformation() {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
         ModelGraph graph = graphPair.getValue0();
 //        graph.display();
@@ -78,10 +79,10 @@ public class TransformationP6aTest extends AbstractTransformationTest {
 //        }
         assertEquals(8, graph.getInteriors().size());
         for (Map.Entry<InteriorNode, Boolean> entry : graphPair.getValue1().entrySet()) {
-            InteriorNode iNode = entry.getKey();
+            InteriorNode interiorNode = entry.getKey();
 
-            if (transformation.isConditionCompleted(graph, iNode)) {
-                transformation.transformGraph(graph, iNode);
+            if (transformation.isConditionCompleted(graph, interiorNode)) {
+                transformation.transformGraph(graph, interiorNode);
             }
         }
 
@@ -94,7 +95,7 @@ public class TransformationP6aTest extends AbstractTransformationTest {
     }
 
     @Test
-    public void envelopeGraphEdgesCount() {
+    public void shouldHaveCorrectEdgeCountAfterTransformation() {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
         ModelGraph graph = graphPair.getValue0();
 
@@ -110,7 +111,7 @@ public class TransformationP6aTest extends AbstractTransformationTest {
     }
 
     @Test
-    public void envelopeGraphNewEdgeProperties() {
+    public void shouldHaveCorrectNewEdgePropertiesAfterTransformation() {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
         ModelGraph graph = graphPair.getValue0();
 
