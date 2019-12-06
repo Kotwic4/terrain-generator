@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("Duplicates")
 public class TransformationP6 implements Transformation {
+    private static final double COMPARISION_THRESHOLD = 0.00000000001d;
 
     // original
     private static final String SIMPLE_NODE_1 = "v1";
@@ -24,7 +25,7 @@ public class TransformationP6 implements Transformation {
 
     // added
     private static final String SIMPLE_NODE_2 = "v2";
-    private static final double COMPARISION_THRESHOLD = 0.00000000001d;
+    private static final String EDGE_7 = "e7";
 
     @Override
     public ModelGraph transformGraph(ModelGraph graph, InteriorNode interiorNode) {
@@ -33,12 +34,11 @@ public class TransformationP6 implements Transformation {
 
             Map<String, Vertex> vertexMap = detectTriangleAndReturnItAsAMap(graph, interiorNode);
 
-            Vertex node2 = vertexMap.get(HANGING_NODE_2);
+            Vertex node2 = vertexMap.remove(HANGING_NODE_2);
             node2.setVertexType(VertexType.SIMPLE_NODE);
-            vertexMap.remove(HANGING_NODE_2);
             vertexMap.put(SIMPLE_NODE_2, node2);
 
-            graph.insertEdge("e7", vertexMap.get(SIMPLE_NODE_2), vertexMap.get(SIMPLE_NODE_5), false);
+            graph.insertEdge(EDGE_7, vertexMap.get(SIMPLE_NODE_2), vertexMap.get(SIMPLE_NODE_5), false);
 
             String leftInteriorId = vertexMap.get(SIMPLE_NODE_1).getId()
                     .concat(vertexMap.get(SIMPLE_NODE_2).getId())
@@ -46,7 +46,6 @@ public class TransformationP6 implements Transformation {
             String rightInteriorId = vertexMap.get(SIMPLE_NODE_2).getId()
                     .concat(vertexMap.get(SIMPLE_NODE_3).getId())
                     .concat(vertexMap.get(SIMPLE_NODE_5).getId());
-
 
             graph.insertInterior(
                     leftInteriorId,
