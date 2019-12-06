@@ -7,9 +7,6 @@ import org.javatuples.Pair;
 import transformation.Transformation;
 import transformation.TransformationP6;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MainApp {
 
     private static Logger log = Logger.getLogger(MainApp.class.getName());
@@ -138,89 +135,7 @@ public class MainApp {
         return new Pair<>(graph, in1);
     }
 
-    private static Pair<ModelGraph, Map<InteriorNode, Boolean>> createEnvelopeGraph() {
-        ModelGraph graph = new ModelGraph("envelopeGraphTest");
-
-        Vertex v0 = graph.insertVertex("v0", VertexType.SIMPLE_NODE, new Point3d(100., 0., 0.));
-        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(200., 0., 0.));
-        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(250., 0., 0.));
-        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(100., 50., 0.));
-        Vertex v4 = graph.insertVertex("v4", VertexType.SIMPLE_NODE, new Point3d(100., 100., 0.));
-        Vertex v5 = graph.insertVertex("v5", VertexType.SIMPLE_NODE, new Point3d(250., 100., 0.));
-        Vertex v6 = graph.insertVertex("v6", VertexType.SIMPLE_NODE, new Point3d(150., 150., 0.));
-
-        Vertex v7 = graph.insertVertex("v7", VertexType.SIMPLE_NODE, new Point3d(150., 50., 0.));
-        Vertex v8 = graph.insertVertex("v8", VertexType.SIMPLE_NODE, new Point3d(250., 50., 0.));
-        Vertex v9 = graph.insertVertex("v9", VertexType.SIMPLE_NODE, new Point3d(150., 100., 0.));
-
-
-        graph.insertEdge("e0", v0, v1);
-        graph.insertEdge("e2", v0, v3);
-        graph.insertEdge("e1", v0, v7);
-
-        graph.insertEdge("e5", v1, v2);
-        graph.insertEdge("e3", v1, v7);
-        graph.insertEdge("e4", v1, v8);
-
-        graph.insertEdge("e7", v2, v5);
-        graph.insertEdge("e6", v2, v8);
-
-        graph.insertEdge("e8", v3, v4);
-        graph.insertEdge("e9", v3, v7);
-
-        graph.insertEdge("e12", v4, v6);
-        graph.insertEdge("e10", v4, v7);
-        graph.insertEdge("e11", v4, v9);
-
-        graph.insertEdge("e14", v5, v6);
-        graph.insertEdge("e15", v5, v8);
-        graph.insertEdge("e13", v5, v9);
-
-        graph.insertEdge("e16", v6, v9);
-
-        // i-nodes
-
-        Map<InteriorNode, Boolean> nodesToFlags = new HashMap<>();
-//        nodesToFlags.put(graph.insertInterior("i0", v0, v3, v7), false);
-//        nodesToFlags.put(graph.insertInterior("i1", v3, v4, v7), false);
-//        nodesToFlags.put(graph.insertInterior("i2", v0, v1, v7), false);
-//        nodesToFlags.put(graph.insertInterior("i5", v1, v4, v5), true);
-//        nodesToFlags.put(graph.insertInterior("i6", v1, v2, v8), false);
-//        nodesToFlags.put(graph.insertInterior("i8", v2, v5, v8), false);
-//        nodesToFlags.put(graph.insertInterior("i3", v4, v6, v9), true);
-//        nodesToFlags.put(graph.insertInterior("i4", v5, v6, v9), true);
-
-        return Pair.with(graph, nodesToFlags);
-    }
-
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        Pair<ModelGraph, Map<InteriorNode, Boolean>> task = createEnvelopeGraph();
-        ModelGraph graph = task.getValue0();
-        Map<InteriorNode, Boolean> interiorNodes = task.getValue1();
-
-        Transformation t1 = new TransformationP6();
-
-        graph.display();
-
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        for (InteriorNode i : interiorNodes.keySet()) {
-            t1.transformGraph(graph, i);
-        }
-
-        graph.display();
-
-
-    }
-
-
-    public static void main2(String[] args) {
         BasicConfigurator.configure();
 
         Pair<ModelGraph, InteriorNode> task = task6();
