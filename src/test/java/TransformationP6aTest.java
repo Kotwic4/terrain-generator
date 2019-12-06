@@ -69,7 +69,13 @@ public class TransformationP6aTest extends AbstractTransformationTest {
     public void envelopeGraphInternalNodesCount() {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
         ModelGraph graph = graphPair.getValue0();
-
+//        graph.display();
+//
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         assertEquals(8, graph.getInteriors().size());
         for (Map.Entry<InteriorNode, Boolean> entry : graphPair.getValue1().entrySet()) {
             InteriorNode iNode = entry.getKey();
@@ -78,6 +84,12 @@ public class TransformationP6aTest extends AbstractTransformationTest {
                 transformation.transformGraph(graph, iNode);
             }
         }
+
+//        try {
+//            Thread.sleep(300000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         assertEquals(9, graph.getInteriors().size());
     }
 
