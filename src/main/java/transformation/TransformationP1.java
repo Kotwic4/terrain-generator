@@ -75,7 +75,7 @@ public class TransformationP1 implements Transformation {
         graph.deleteEdge(simpleVertex1, simpleVertex2);
 
         Vertex insertedVertex = graph.insertVertex(interiorNode.getId(),
-                VertexType.HANGING_NODE,
+                VertexType.SIMPLE_NODE,
                 Point3d.middlePoint(simpleVertex1.getCoordinates(), simpleVertex2.getCoordinates()));
 
         String newEdge1Id = simpleVertex1.getId().concat(insertedVertex.getId());

@@ -1,6 +1,5 @@
 import model.*;
 import org.javatuples.Pair;
-import org.junit.Ignore;
 import org.junit.Test;
 import transformation.Transformation;
 import transformation.TransformationP1;
@@ -64,7 +63,6 @@ public class TransformationP1Test extends AbstractTransformationTest {
                 graph.getInterior("i1").orElseThrow(AssertionError::new)).getVertices().size());
     }
 
-    @Ignore
     @Test
     public void transformationProducesOneNewSimpleVertex() {
         ModelGraph graph = createObtuseTriangleGraph(true);
