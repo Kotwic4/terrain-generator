@@ -1,141 +1,95 @@
 package app;
 
+import javafx.geometry.Point3D;
 import model.*;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import processor.MapProcessingUtil;
-import transformation.Transformation;
-import transformation.TransformationP1;
-import transformation.TransformationP3;
-import transformation.TransformationP7;
+import transformation.*;
+
+import java.util.*;
 
 public class MainApp {
 
     private static Logger log = Logger.getLogger(MainApp.class.getName());
 
-    private static Pair<ModelGraph, InteriorNode> task1() {
-        ModelGraph graph = new ModelGraph("testGraph");
-        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
-        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(2.0, 0.0, 0.0));
-        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(1.0, 1.0, 0.0));
-        graph.insertEdge("e1", v1, v2, true);
-        graph.insertEdge("e2", v2, v3, true);
-        graph.insertEdge("e3", v3, v1, true);
-        InteriorNode in1 = graph.insertInterior("i1", v1, v2, v3);
-        in1.setPartitionRequired(true);
-
-        return new Pair<>(graph, in1);
-    }
-
-    private static Pair<ModelGraph, InteriorNode> task5() {
-        ModelGraph graph = new ModelGraph("testGraph");
-        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
-        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(2.0, 0.0, 0.0));
-        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(1.0, 1.0, 0.0));
-        Vertex h4 = graph.insertVertex("h4", VertexType.HANGING_NODE, new Point3d(1.0, 0.0, 0.0));
-
-        GraphEdge v1_h4 = graph.insertEdge("e1", v1, h4, true);
-        GraphEdge v1_v3 = graph.insertEdge("e2", v1, v3, true);
-        GraphEdge h4_v2 = graph.insertEdge("e3", h4, v2, true);
-        GraphEdge v2_v3 = graph.insertEdge("e4", v2, v3, true);
-
-        InteriorNode in1 = graph.insertInterior("i1", v1, v2, v3);
-        return new Pair<>(graph, in1);
-    }
-
-    private static Pair<ModelGraph, InteriorNode> task11() {
-        ModelGraph graph = new ModelGraph("testGraph");
-        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
-        Vertex h2 = graph.insertVertex("h2", VertexType.HANGING_NODE, new Point3d(1.0, 0.0, 0.0));
-        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(2.0, 0.0, 0.0));
-        Vertex h4 = graph.insertVertex("h4", VertexType.HANGING_NODE, new Point3d(1.5, 0.5, 0.0));
-        Vertex v5 = graph.insertVertex("v5", VertexType.SIMPLE_NODE, new Point3d(1.0, 1.0, 0.0));
-
-        GraphEdge v1_h2 = graph.insertEdge("e1", v1, h2, true);
-        GraphEdge h2_v3 = graph.insertEdge("e2", h2, v3, true);
-        GraphEdge v3_h4 = graph.insertEdge("e3", v3, h4, true);
-        GraphEdge h3_v5 = graph.insertEdge("e4", h4, v5, true);
-        GraphEdge v1_h5 = graph.insertEdge("e5", v1, v5, true);
-
-        InteriorNode in1 = graph.insertInterior("i1", v1, v3, v5, h2, h4);
-        return new Pair<>(graph, in1);
-    }
-
-    private static Pair<ModelGraph, InteriorNode> task15(){
-        ModelGraph graph = new ModelGraph("testGraph");
-        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
-        Vertex h2 = graph.insertVertex("h2", VertexType.HANGING_NODE, new Point3d(1.0, 0.0, 0.0));
-        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(2.0, 0.0, 0.0));
-        Vertex h4 = graph.insertVertex("h4", VertexType.HANGING_NODE, new Point3d(1.75, 1.0, 0.0));
-        Vertex v5 = graph.insertVertex("v5", VertexType.SIMPLE_NODE, new Point3d(1.5, 2.0, 0.0));
-
-        GraphEdge v1_h2 = graph.insertEdge("e1", v1, h2, false);
-        GraphEdge h2_v3 = graph.insertEdge("e2", h2, v3, false);
-        GraphEdge v3_h4 = graph.insertEdge("e3", v3, h4, false);
-        GraphEdge h3_v5 = graph.insertEdge("e4", h4, v5, false);
-        GraphEdge v1_h5 = graph.insertEdge("e5", v1, v5, false);
-
-        InteriorNode in1 = graph.insertInterior("i1", v1, v3, v5, h2, h4);
-        return new Pair<>(graph, in1);
-    }
-
-    private static Pair<ModelGraph, InteriorNode> task17() {
-        ModelGraph graph = new ModelGraph("testGraph");
-        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
-        Vertex h2 = graph.insertVertex("h2", VertexType.HANGING_NODE, new Point3d(1.0, 0.0, 0.0));
-        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(2.0, 0.0, 0.0));
-        Vertex h4 = graph.insertVertex("h4", VertexType.HANGING_NODE, new Point3d(1.5, 0.5, 0.0));
-        Vertex v5 = graph.insertVertex("v5", VertexType.SIMPLE_NODE, new Point3d(1.0, 1.0, 0.0));
-        Vertex h6 = graph.insertVertex("h6", VertexType.HANGING_NODE, new Point3d(0.5, 0.5, 0.0));
-
-        GraphEdge v1_h2 = graph.insertEdge("e1", v1, h2, true);
-        GraphEdge h2_v3 = graph.insertEdge("e2", h2, v3, true);
-        GraphEdge v3_h4 = graph.insertEdge("e3", v3, h4, true);
-        GraphEdge h4_v5 = graph.insertEdge("e4", h4, v5, true);
-        GraphEdge v5_h6 = graph.insertEdge("e5", v5, h6, true);
-        GraphEdge h6_v1 = graph.insertEdge("e6", h6, v1, true);
-
-        InteriorNode in1 = graph.insertInterior("i1", v1, v3, v5);
-        return new Pair<>(graph, in1);
-    }
-
-    private static Pair<ModelGraph, InteriorNode> task13() {
-        ModelGraph graph = new ModelGraph("testGraph");
-        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
-        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(1.0, 0.0, 0.0));
-        Vertex v5 = graph.insertVertex("v5", VertexType.SIMPLE_NODE, new Point3d(2.0, 1.0, 0.0));
-        Vertex h2 = graph.insertVertex("h2", VertexType.HANGING_NODE, Point3d.middlePoint(v1.getCoordinates(), v3.getCoordinates()));
-        Vertex h4 = graph.insertVertex("h4", VertexType.HANGING_NODE, Point3d.middlePoint(v3.getCoordinates(), v5.getCoordinates()));
-
-        GraphEdge v1_h2 = graph.insertEdge("e1", v1, h2, false);
-        GraphEdge h2_v3 = graph.insertEdge("e2", h2, v3, false);
-        GraphEdge v3_h4 = graph.insertEdge("e3", v3, h4, false);
-        GraphEdge h4_v5 = graph.insertEdge("e4", h4, v5, false);
-        GraphEdge v1_v5 = graph.insertEdge("e6", v1, v5, true);
-
-        InteriorNode in1 = graph.insertInterior("i1", v1, v3, v5, h2, h4);
-        return new Pair<>(graph, in1);
-    }
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure();
 
-        Pair<ModelGraph, InteriorNode> task = task5();
-        ModelGraph graph = task.getValue0();
-        InteriorNode interiorNode = task.getValue1();
+        Transformation t1 = new TransformationP1();
+        Transformation t2 = new TransformationP2();
+        Transformation t3 = new TransformationP3();
+        Transformation t4 = new TransformationP4();
 
-        Transformation t1 = new TransformationP3();
-        log.info(String.format("Condition state for transformation P1: %b", t1.isConditionCompleted(graph, interiorNode)));
+        ModelGraph graph = new ModelGraph("test");
+        Vertex v1 = new Vertex(graph, "v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, -42.0));
+        Vertex v2 = new Vertex(graph, "v2", VertexType.SIMPLE_NODE, new Point3d(0.0, 100.0, -42.0));
+        Vertex v3 = new Vertex(graph, "v3", VertexType.SIMPLE_NODE, new Point3d(100.0, 0.0, -42.0));
+        Vertex v4 = new Vertex(graph, "v4", VertexType.SIMPLE_NODE, new Point3d(100.0, 100.0, -42.0));
+        GraphEdge e1 = new GraphEdge("e1", "E", new Pair<>(v1, v2), false);
+        GraphEdge e2 = new GraphEdge("e2", "E", new Pair<>(v4, v3), false);
+        GraphEdge e3 = new GraphEdge("e3", "E", new Pair<>(v3, v1), false);
+        GraphEdge e4 = new GraphEdge("e4", "E", new Pair<>(v2, v4), false);
+        GraphEdge e5 = new GraphEdge("e5", "E", new Pair<>(v4, v1), false);
+
+        graph.insertVertex(v1);
+        graph.insertVertex(v2);
+        graph.insertVertex(v3);
+        graph.insertVertex(v4);
+        graph.insertEdge(e1);
+        graph.insertEdge(e2);
+        graph.insertEdge(e3);
+        graph.insertEdge(e4);
+        graph.insertEdge(e5);
+        graph.insertInterior("i1", v1, v2, v4);
+        graph.insertInterior("i2", v1, v3, v4);
 
         graph.display();
+        Point3d optimizedPoint = new Point3d(27.5, 52.5, -42.0);
 
+
+        System.out.println("Start breaking");
+        while (!isGraphOptimized(optimizedPoint, graph)) {
+            Thread.sleep(5000);
+            setPartitionRequired(graph.getInteriors(), optimizedPoint);
+            for (InteriorNode interiorNode : new ArrayList<>(graph.getInteriors())) {
+                if (t1.isConditionCompleted(graph, interiorNode))
+                    t1.transformGraph(graph, interiorNode);
+            }
+            boolean dryRun = false;
+            Thread.sleep(5000);
+            while (!dryRun) {
+                dryRun = true;
+                for (InteriorNode interiorNode : new ArrayList<>(graph.getInteriors())) {
+                    if (t2.isConditionCompleted(graph, interiorNode)) {
+                        t2.transformGraph(graph, interiorNode);
+                        dryRun = false;
+                    }
+                }
+                for (InteriorNode interiorNode : new ArrayList<>(graph.getInteriors())) {
+                    if (t3.isConditionCompleted(graph, interiorNode)) {
+                        t3.transformGraph(graph, interiorNode);
+                        dryRun = false;
+                    }
+                }
+                for (InteriorNode interiorNode : new ArrayList<>(graph.getInteriors())) {
+                    if (t4.isConditionCompleted(graph, interiorNode)) {
+                        t4.transformGraph(graph, interiorNode);
+                        dryRun = false;
+                    }
+                }
+            }
+        }
+
+        graph.display();
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        t1.transformGraph(graph, interiorNode);
+//        t1.transformGraph(graph, interiorNode);
 
 //        TerrainMap map = new TerrainMap();
 //        map.fillMapWithExampleData();
@@ -151,5 +105,45 @@ public class MainApp {
 //
 //        System.out.println(map.getAllPointsInTriangleArea(in1).size());
 //        System.out.println(MapProcessingUtil.calculateTerrainApproximationError(in1, map));
+    }
+
+    private static void setPartitionRequired(Collection<InteriorNode> interiors, Point3d optimizedPoint) {
+        for (InteriorNode i : interiors) {
+            if (isInsideTriangle(optimizedPoint, i.getTriangle())) {
+                i.setPartitionRequired(true);
+            }
+        }
+    }
+
+    private static boolean isGraphOptimized(Point3d optimizedPoint, ModelGraph graph) {
+        for (InteriorNode interiorNode : graph.getInteriors()) {
+            Point3d p1 = interiorNode.getTriangle().getValue0().getCoordinates();
+            Point3d p2 = interiorNode.getTriangle().getValue1().getCoordinates();
+            Point3d p3 = interiorNode.getTriangle().getValue2().getCoordinates();
+            List<Point3d> soughtTriangle = Arrays.asList(
+                    new Point3d(25, 50, -42),
+                    new Point3d(50, 50, -42),
+                    new Point3d(25, 75, -42));
+            List<Point3d> givenTriangle = Arrays.asList(p1, p2, p3);
+            if (new HashSet<>(givenTriangle).equals(new HashSet<>(soughtTriangle)))
+                return true;
+        }
+        return false;
+    }
+
+    private static double sign(Point3d p1, Point3d p2, Point3d p3) {
+        return (p1.getX() - p3.getX()) * (p2.getY() - p3.getY()) - (p2.getX() - p3.getX()) * (p1.getY() - p3.getY());
+    }
+
+
+    private static boolean isInsideTriangle(Point3d point, Triplet<Vertex, Vertex, Vertex> triangle) {
+        double d1 = sign(point, triangle.getValue0().getCoordinates(), triangle.getValue1().getCoordinates());
+        double d2 = sign(point, triangle.getValue1().getCoordinates(), triangle.getValue2().getCoordinates());
+        double d3 = sign(point, triangle.getValue2().getCoordinates(), triangle.getValue0().getCoordinates());
+
+        boolean has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+        boolean has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+        return !(has_neg && has_pos);
     }
 }

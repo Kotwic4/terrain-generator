@@ -10,10 +10,13 @@ import java.util.stream.Stream;
 public class TransformationP2 implements Transformation {
     @Override
     public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
-        Triplet<Vertex, Vertex, Vertex> triangle = getOrderedTriangle(interiorNode.getTriangleVertexes(), graph);
-
-        return areAllVertexType(triangle) &&
-                isTransformationConditionFulfilled(graph, triangle);
+        try {
+            Triplet<Vertex, Vertex, Vertex> triangle = getOrderedTriangle(interiorNode.getTriangleVertexes(), graph);
+            return areAllVertexType(triangle) &&
+                    isTransformationConditionFulfilled(graph, triangle);
+        } catch (RuntimeException ex) {
+            return false;
+        }
     }
 
     @Override
@@ -25,8 +28,8 @@ public class TransformationP2 implements Transformation {
         Vertex third = triangle.getValue2();
         Vertex hanging = getHangingVertexBetween(first, second, graph); //hanging vertex
 
-        GraphEdge firstToHanging = graph.getEdgeById(first.getEdgeBetween(hanging).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
-        GraphEdge hangingToSecond = graph.getEdgeById(hanging.getEdgeBetween(second).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
+        GraphEdge firstToHanging = graph.getEdgeById(first.getEdgeBetween(hanging).getId()).orElseThrow(() -> new RuntimeException("Unknown edge id"));
+        GraphEdge hangingToSecond = graph.getEdgeById(hanging.getEdgeBetween(second).getId()).orElseThrow(() -> new RuntimeException("Unknown edge id"));
 
         //remove old
         graph.removeInterior(interiorNode.getId());
@@ -60,7 +63,7 @@ public class TransformationP2 implements Transformation {
         return graph;
     }
 
-    private Optional<Vertex> getHangingVertexBetweenOp(Vertex v1, Vertex v2, ModelGraph graph){
+    private Optional<Vertex> getHangingVertexBetweenOp(Vertex v1, Vertex v2, ModelGraph graph) {
         List<Vertex> available = graph.getVertexesBetween(v1, v2);
 
         return available
@@ -69,31 +72,31 @@ public class TransformationP2 implements Transformation {
                 .findAny();
     }
 
-    private Vertex getHangingVertexBetween(Vertex v1, Vertex v2, ModelGraph graph){
+    private Vertex getHangingVertexBetween(Vertex v1, Vertex v2, ModelGraph graph) {
         return getHangingVertexBetweenOp(v1, v2, graph)
-                .orElseThrow(() -> new RuntimeException("Hanging vertex between " + v1.getId() +" and " + v2.getId() + " not found"));
+                .orElseThrow(() -> new RuntimeException("Hanging vertex between " + v1.getId() + " and " + v2.getId() + " not found"));
     }
 
-    private boolean isTransformationConditionFulfilled(ModelGraph graph, Triplet<Vertex, Vertex, Vertex> triangle){
+    private boolean isTransformationConditionFulfilled(ModelGraph graph, Triplet<Vertex, Vertex, Vertex> triangle) {
         Vertex first = triangle.getValue0();
         Vertex second = triangle.getValue1();
         Vertex third = triangle.getValue2();
         Vertex hanging = getHangingVertexBetween(first, second, graph);
 
-        GraphEdge L1 = graph.getEdgeById(first.getEdgeBetween(hanging).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
-        GraphEdge L2 = graph.getEdgeById(hanging.getEdgeBetween(second).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
-        GraphEdge L3 = graph.getEdgeById(second.getEdgeBetween(third).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
-        GraphEdge L4 = graph.getEdgeById(third.getEdgeBetween(first).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
+        GraphEdge L1 = graph.getEdgeById(first.getEdgeBetween(hanging).getId()).orElseThrow(() -> new RuntimeException("Unknown edge id"));
+        GraphEdge L2 = graph.getEdgeById(hanging.getEdgeBetween(second).getId()).orElseThrow(() -> new RuntimeException("Unknown edge id"));
+        GraphEdge L3 = graph.getEdgeById(second.getEdgeBetween(third).getId()).orElseThrow(() -> new RuntimeException("Unknown edge id"));
+        GraphEdge L4 = graph.getEdgeById(third.getEdgeBetween(first).getId()).orElseThrow(() -> new RuntimeException("Unknown edge id"));
 
         return (L1.getL() + L2.getL()) >= L3.getL() && (L1.getL() + L2.getL()) >= L4.getL();
     }
 
-    private Triplet<Vertex, Vertex, Vertex> getOrderedTriangle(Triplet<Vertex, Vertex, Vertex> v, ModelGraph graph){
-        if(getHangingVertexBetweenOp(v.getValue0(), v.getValue1(), graph).isPresent()){
+    private Triplet<Vertex, Vertex, Vertex> getOrderedTriangle(Triplet<Vertex, Vertex, Vertex> v, ModelGraph graph) {
+        if (getHangingVertexBetweenOp(v.getValue0(), v.getValue1(), graph).isPresent()) {
             return v;
-        } else if (getHangingVertexBetweenOp(v.getValue0(), v.getValue2(), graph).isPresent()){
+        } else if (getHangingVertexBetweenOp(v.getValue0(), v.getValue2(), graph).isPresent()) {
             return new Triplet<>(v.getValue2(), v.getValue0(), v.getValue1());
-        } else if(getHangingVertexBetweenOp(v.getValue1(), v.getValue2(), graph).isPresent()) {
+        } else if (getHangingVertexBetweenOp(v.getValue1(), v.getValue2(), graph).isPresent()) {
             return new Triplet<>(v.getValue1(), v.getValue2(), v.getValue0());
         }
         throw new RuntimeException("Configuration with hanging vertex between 2 vertexes was not found");
@@ -101,12 +104,12 @@ public class TransformationP2 implements Transformation {
 
     private boolean areAllVertexType(Triplet<Vertex, Vertex, Vertex> triangle) {
         return triangle.toList().stream().map(e -> {
-            Vertex v = (Vertex)e;
+            Vertex v = (Vertex) e;
             return isVertexType(v);
         }).reduce(true, (acc, e) -> acc && e);
     }
 
-    private boolean isVertexType(Vertex v){
+    private boolean isVertexType(Vertex v) {
         return v.getVertexType() == VertexType.SIMPLE_NODE;
     }
 }
