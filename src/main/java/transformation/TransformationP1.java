@@ -91,8 +91,6 @@ public class TransformationP1 implements Transformation {
 
         List<GraphEdge> edges = Stream.of(edge1, edge2, edge3).collect(Collectors.toList());
 
-        List<GraphEdge> filteredEdges = edges.stream().filter(e -> checkEdge(e, edges, onB)).collect(Collectors.toList());
-
         return edges.stream().filter(e -> checkEdge(e, edges, onB)).findFirst();
     }
 
