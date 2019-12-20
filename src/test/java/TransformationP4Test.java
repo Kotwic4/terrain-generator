@@ -117,7 +117,7 @@ public class TransformationP4Test extends AbstractTransformationTest {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
         ModelGraph graph = graphPair.getValue0();
 
-        assertEquals(52, graph.getEdges().size());
+        assertEquals(51, graph.getEdges().size());
         for (Map.Entry<InteriorNode, Boolean> entry : graphPair.getValue1().entrySet()) {
             InteriorNode iNode = entry.getKey();
 
@@ -126,17 +126,17 @@ public class TransformationP4Test extends AbstractTransformationTest {
                 transformation.transformGraph(graph, iNode);
             }
         }
-        assertEquals(56, graph.getEdges().size());
+        assertEquals(55, graph.getEdges().size());
     }
 
     @Test
     public void envelopeGraphNewEdgeProperties() {
         Pair<ModelGraph, Map<InteriorNode, Boolean>> graphPair = createEnvelopeGraph();
         ModelGraph graph = graphPair.getValue0();
-        InteriorNode iNode = graph.getInterior("i5").orElseThrow(IllegalStateException::new);
+        InteriorNode iNode = graph.getInterior("i1").orElseThrow(IllegalStateException::new);
 
-        Vertex v1 = getVertexIfExists(graph, "v2");
-        Vertex v3 = getVertexIfExists(graph, "v5");
+        Vertex v1 = getVertexIfExists(graph, "v1");
+        Vertex v3 = getVertexIfExists(graph, "v3");
 
         Double expectedEdgeLength = Math.sqrt(Math.pow(v1.getXCoordinate() - v3.getXCoordinate(), 2.0) +
                 Math.pow(v1.getYCoordinate() - v3.getYCoordinate(), 2.0) +
@@ -173,6 +173,7 @@ public class TransformationP4Test extends AbstractTransformationTest {
                 transformation.transformGraph(graph, iNode);
             }
         }
+
         assertEquals(30, graph.getEdges().size());
     }
 
@@ -241,7 +242,7 @@ public class TransformationP4Test extends AbstractTransformationTest {
         Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(250., 100., 0.));
 
         Vertex v3 = graph.insertVertex("v3", VertexType.HANGING_NODE, new Point3d(50., 50., 0.));
-        Vertex v4 = graph.insertVertex("v4", VertexType.HANGING_NODE, new Point3d(100., 50., 0.));
+//        Vertex v4 = graph.insertVertex("v4", VertexType.HANGING_NODE, new Point3d(100., 50., 0.));
         Vertex v5 = graph.insertVertex("v5", VertexType.HANGING_NODE, new Point3d(150., 50., 0.));
         Vertex v6 = graph.insertVertex("v6", VertexType.HANGING_NODE, new Point3d(225., 50., 0.));
 
@@ -251,7 +252,7 @@ public class TransformationP4Test extends AbstractTransformationTest {
         Vertex v10 = graph.insertVertex("v10", VertexType.SIMPLE_NODE, new Point3d(250., 0., 0.));
 
         Vertex v11 = graph.insertVertex("v11", VertexType.SIMPLE_NODE, new Point3d(50., 150., 0));
-        Vertex v12 = graph.insertVertex("v12", VertexType.SIMPLE_NODE, new Point3d(50., 100., 0));
+        Vertex v12 = graph.insertVertex("v12", VertexType.HANGING_NODE, new Point3d(50., 100., 0));
 
         //edges
        // graph.insertEdge("e0", v0, v1);
@@ -261,7 +262,7 @@ public class TransformationP4Test extends AbstractTransformationTest {
         graph.insertEdge("e1", v0, v7);
 
 
-        graph.insertEdge("e3", v1, v4);
+        graph.insertEdge("e3", v1, v8); // changed
         graph.insertEdge("e4", v1, v5);
         graph.insertEdge("e5", v1, v2);
 
@@ -270,7 +271,7 @@ public class TransformationP4Test extends AbstractTransformationTest {
         graph.insertEdge("e7", v2, v10);
 
       //  graph.insertEdge("e8", v4, v5);
-        graph.insertEdge("e9", v4, v8);
+//        graph.insertEdge("e9", v4, v8);   //changed
 
         graph.insertEdge("e10", v5, v8);
         graph.insertEdge("e11", v5, v9);
@@ -296,9 +297,9 @@ public class TransformationP4Test extends AbstractTransformationTest {
         // i-nodes
         Map<InteriorNode, Boolean> nodesToFlags = new HashMap<>();
         nodesToFlags.put(graph.insertInterior("i0", v0, v3, v7), false);
-        nodesToFlags.put(graph.insertInterior("i1", v0, v1, v8), false); // changed to false
+        nodesToFlags.put(graph.insertInterior("i1", v0, v1, v8), true); // changed to false
 //        nodesToFlags.put(graph.insertInterior("i2", v1, v4, v5), false);
-        nodesToFlags.put(graph.insertInterior("i5", v1, v2, v9), true);
+        nodesToFlags.put(graph.insertInterior("i5", v1, v2, v9), false); // > false
         nodesToFlags.put(graph.insertInterior("i6", v2, v6, v10), false);
         nodesToFlags.put(graph.insertInterior("i8", v3, v7, v8), false);
 //        nodesToFlags.put(graph.insertInterior("i3", v4, v5, v8), false);
