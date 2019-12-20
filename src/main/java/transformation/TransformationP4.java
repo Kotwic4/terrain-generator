@@ -89,6 +89,9 @@ public class TransformationP4 implements Transformation {
         }
         else throw new InvalidProduction();
 
+        if(edgeLengthBetween(v0, v2) < edgeLengthBetween(v2, v4) || edgeLengthBetween(v0, v2) < edgeLengthBetween(v0, v4))
+            throw new InvalidProduction();
+
         v1 = this.getMiddleVertex(graph, v0, v2);
         v3 = this.getMiddleVertex(graph, v2, v4);
 
