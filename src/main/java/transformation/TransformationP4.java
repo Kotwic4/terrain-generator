@@ -44,7 +44,10 @@ public class TransformationP4 implements Transformation {
 
         Vertex v0, v1, v2, v3, v4;
 
-        if(numberOfVertexesBetween(graph, v0p, v2p) == 1 && numberOfVertexesBetween(graph, v0p, v4p) == 1) {
+        if(numberOfVertexesBetween(graph, v0p, v2p) == 1
+                && numberOfVertexesBetween(graph, v0p, v4p) == 1
+                && numberOfVertexesBetween(graph, v2p, v4p) == 0) {
+
             v2 = v0p;
             if(edgeLengthBetween(v2, v2p) < edgeLengthBetween(v2, v4p)){
                 v4 = v2p;
@@ -55,9 +58,12 @@ public class TransformationP4 implements Transformation {
                 v0 = v2p;
             }
         }
-        else if(numberOfVertexesBetween(graph, v2p, v0p) == 1 && numberOfVertexesBetween(graph, v2p, v4p) == 1) {
+        else if(numberOfVertexesBetween(graph, v2p, v0p) == 1
+                && numberOfVertexesBetween(graph, v2p, v4p) == 1
+                && numberOfVertexesBetween(graph, v0p, v4p) == 0) {
+
             v2 = v2p;
-            if(edgeLengthBetween(v2, v4p) < edgeLengthBetween(v2, v0p)){
+            if(edgeLengthBetween(v2, v4p) < edgeLengthBetween(v2, v0p)){            //lub <= (???)        jedna krawedz nie moze byc krotsza od pozostalych inaczej wylatuje
                 v4 = v4p;
                 v0 = v0p;
             }
@@ -66,7 +72,10 @@ public class TransformationP4 implements Transformation {
                 v0 = v4p;
             }
         }
-        else if(numberOfVertexesBetween(graph, v4p, v0p) == 1 && numberOfVertexesBetween(graph, v4p, v2p) == 1) {
+        else if(numberOfVertexesBetween(graph, v4p, v0p) == 1
+                && numberOfVertexesBetween(graph, v4p, v2p) == 1
+                && numberOfVertexesBetween(graph, v0p, v2p) == 0) {
+
             v2 = v4p;
             if(edgeLengthBetween(v2, v0p) < edgeLengthBetween(v2, v2p)){
                 v4 = v0p;
