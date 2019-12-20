@@ -68,6 +68,7 @@ public class TransformationP2 implements Transformation {
 
         return available
                 .stream()
+                .filter(vertex -> vertex.getCoordinates().equals(Point3d.middlePoint(v1.getCoordinates(), v2.getCoordinates())))
                 .filter(vertex -> vertex.getVertexType() == VertexType.HANGING_NODE)
                 .findAny();
     }
