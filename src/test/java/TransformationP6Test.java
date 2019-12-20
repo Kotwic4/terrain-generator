@@ -176,7 +176,7 @@ public class TransformationP6Test extends AbstractTransformationTest {
         graph.insertEdge("e6", v2, v3);
         graph.insertEdge("e7", v3, v6);
         graph.insertEdge("e8", v3, v9);
-        graph.insertEdge("e9", v4, v5);
+//        graph.insertEdge("e9", v4, v5);
         graph.insertEdge("e10", v4, v7);
         graph.insertEdge("e11", v5, v7);
         graph.insertEdge("e12", v5, v8);

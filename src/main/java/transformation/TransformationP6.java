@@ -63,12 +63,6 @@ public class TransformationP6 implements Transformation {
             vertices.addLast(vertices.removeFirst());
             edges.addLast(edges.removeFirst());
             edges.addLast(edges.removeFirst());
-
-        } else if (base2 > base0 && base2 > base1) {
-            vertices.addFirst(vertices.removeLast());
-            vertices.addFirst(vertices.removeLast());
-            edges.addFirst(edges.removeLast());
-            edges.addFirst(edges.removeLast());
         }
 
         return Pair.with(edges, vertices);

@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 import processor.MapProcessingUtil;
 import transformation.Transformation;
-import transformation.TransformationP1;
+import transformation.TransformationP6;
 import transformation.TransformationP3;
 import transformation.TransformationP7;
 
@@ -41,6 +41,26 @@ public class MainApp {
         GraphEdge v2_v3 = graph.insertEdge("e4", v2, v3, true);
 
         InteriorNode in1 = graph.insertInterior("i1", v1, v2, v3);
+        return new Pair<>(graph, in1);
+    }
+
+    private static Pair<ModelGraph, InteriorNode> task6() {
+        ModelGraph graph = new ModelGraph("testGraph");
+        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(100.0, 0.0, 0.0));
+        Vertex v3 = graph.insertVertex("v3", VertexType.SIMPLE_NODE, new Point3d(200.0, 0.0, 0.0));
+        Vertex v5 = graph.insertVertex("v5", VertexType.SIMPLE_NODE, new Point3d(150.0, 50.0, 0.0));
+        Vertex h2 = graph.insertVertex("h2", VertexType.HANGING_NODE, Point3d.middlePoint(v1.getCoordinates(), v3.getCoordinates()));
+        Vertex h4 = graph.insertVertex("h4", VertexType.HANGING_NODE, Point3d.middlePoint(v3.getCoordinates(), v5.getCoordinates()));
+        Vertex h6 = graph.insertVertex("h6", VertexType.HANGING_NODE, Point3d.middlePoint(v5.getCoordinates(), v1.getCoordinates()));
+
+        graph.insertEdge("e1", v1, h2, false);
+        graph.insertEdge("e2", h2, v3, false);
+        graph.insertEdge("e3", v3, h4, false);
+        graph.insertEdge("e4", h4, v5, false);
+        graph.insertEdge("e5", v5, h6, false);
+        graph.insertEdge("e6", h6, v1, false);
+
+        InteriorNode in1 = graph.insertInterior("i1", v1, v3, v5, h2, h4, h6);
         return new Pair<>(graph, in1);
     }
 
@@ -121,11 +141,11 @@ public class MainApp {
     public static void main(String[] args) {
         BasicConfigurator.configure();
 
-        Pair<ModelGraph, InteriorNode> task = task5();
+        Pair<ModelGraph, InteriorNode> task = task6();
         ModelGraph graph = task.getValue0();
         InteriorNode interiorNode = task.getValue1();
 
-        Transformation t1 = new TransformationP3();
+        Transformation t1 = new TransformationP6();
         log.info(String.format("Condition state for transformation P1: %b", t1.isConditionCompleted(graph, interiorNode)));
 
         graph.display();
