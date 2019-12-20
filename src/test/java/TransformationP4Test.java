@@ -344,7 +344,7 @@ public class TransformationP4Test extends AbstractTransformationTest {
         Map<InteriorNode, Boolean> nodesToFlags = new HashMap<>();
         nodesToFlags.put(graph.insertInterior("i0", v0, v1, v5), false);
         nodesToFlags.put(graph.insertInterior("i1", v0, v2, v3), true);
-        nodesToFlags.put(graph.insertInterior("i2", v0, v1, v2), false);
+        nodesToFlags.put(graph.insertInterior("i2", v5, v1, v2), false);
         nodesToFlags.put(graph.insertInterior("i3", v3, v4, v6), false);
         nodesToFlags.put(graph.insertInterior("i4", v2, v4, v6), false);
 
@@ -352,11 +352,6 @@ public class TransformationP4Test extends AbstractTransformationTest {
 
 
     }
-
-
-
-
-
 
     private Vertex getVertexIfExists(ModelGraph graph, String vertexId) {
         return graph.getVertex(vertexId)
