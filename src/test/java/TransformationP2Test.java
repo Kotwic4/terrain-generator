@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import transformation.Transformation;
 import transformation.TransformationP2;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Arrays;
 import java.util.List;
@@ -176,5 +177,38 @@ public class TransformationP2Test extends AbstractTransformationTest {
 
         InteriorNode in1 = graph.insertInterior("i1", v1, v2, v3);
         return new Triplet<>(graph, in1, h4);
+    }
+
+    @Test
+    public void p2TransformationTestNotApplicableToHangingNodeOutsideMiddle() {
+        ModelGraph graph = createEmptyGraph();
+        Vertex v0 = graph.insertVertex("v0", VertexType.SIMPLE_NODE, new Point3d(200.0, 0.0, 0.0));
+        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
+        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(100.0, 100.0, 0.0));
+        Vertex h0 = graph.insertVertex("h0", VertexType.HANGING_NODE, new Point3d(100.0, -50.0, 0.0));
+        graph.insertEdge("e0", v0, v1);
+        graph.insertEdge("e1", v1, v2);
+        graph.insertEdge("e2", v2, v0);
+        graph.insertEdge("e3", v0, h0);
+        graph.insertEdge("e4", v1, h0);
+        InteriorNode i0 = graph.insertInterior("i0", v0, v1, v2);
+
+        assertEquals(transformation.isConditionCompleted(graph, i0), false);
+    }
+
+    @Test
+    public void p2TransformationDoesNotThrowException() {
+        ModelGraph graph = createEmptyGraph();
+        Vertex v0 = graph.insertVertex("v0", VertexType.SIMPLE_NODE, new Point3d(200.0, 0.0, 0.0));
+        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
+        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(100.0, 100.0, 0.0));
+        graph.insertEdge("e0", v0, v1);
+        graph.insertEdge("e1", v1, v2);
+        graph.insertEdge("e2", v2, v0);
+        InteriorNode i0 = graph.insertInterior("i0", v0, v1, v2);
+
+        assertDoesNotThrow(() -> {
+            transformation.isConditionCompleted(graph, i0);
+        });
     }
 }

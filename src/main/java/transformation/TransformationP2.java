@@ -10,8 +10,12 @@ import java.util.stream.Stream;
 public class TransformationP2 implements Transformation {
     @Override
     public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
-        Triplet<Vertex, Vertex, Vertex> triangle = getOrderedTriangle(interiorNode.getTriangleVertexes(), graph);
-
+        Triplet<Vertex, Vertex, Vertex> triangle;
+        try {
+            triangle = getOrderedTriangle(interiorNode.getTriangleVertexes(), graph);
+        } catch (Exception e) {
+            return false;
+        }
         return areAllVertexType(triangle) &&
                 isTransformationConditionFulfilled(graph, triangle);
     }
