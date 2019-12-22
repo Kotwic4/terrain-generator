@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import transformation.Transformation;
 import transformation.TransformationP2;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Arrays;
 import java.util.List;
@@ -193,5 +194,21 @@ public class TransformationP2Test extends AbstractTransformationTest {
         InteriorNode i0 = graph.insertInterior("i0", v0, v1, v2);
 
         assertEquals(transformation.isConditionCompleted(graph, i0), false);
+    }
+
+    @Test
+    public void p2TransformationDoesNotThrowException() {
+        ModelGraph graph = createEmptyGraph();
+        Vertex v0 = graph.insertVertex("v0", VertexType.SIMPLE_NODE, new Point3d(200.0, 0.0, 0.0));
+        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 0.0));
+        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(100.0, 100.0, 0.0));
+        graph.insertEdge("e0", v0, v1);
+        graph.insertEdge("e1", v1, v2);
+        graph.insertEdge("e2", v2, v0);
+        InteriorNode i0 = graph.insertInterior("i0", v0, v1, v2);
+
+        assertDoesNotThrow(() -> {
+            transformation.isConditionCompleted(graph, i0);
+        });
     }
 }
