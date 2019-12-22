@@ -61,16 +61,11 @@ public class MainApp {
                         change = true;
                         break;
                     }
-                    try{
-                        if(t2.isConditionCompleted(graph, node)){
-                            t2.transformGraph(graph,node);
-                            change = true;
-                            break;
-                        }
-                    } catch (Exception e) {
-//                        e.printStackTrace();
+                    if(t2.isConditionCompleted(graph, node)){
+                        t2.transformGraph(graph,node);
+                        change = true;
+                        break;
                     }
-
                 }
             }
             Thread.sleep(3000l);
