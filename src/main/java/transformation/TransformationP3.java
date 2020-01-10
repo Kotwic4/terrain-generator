@@ -81,7 +81,7 @@ public class TransformationP3 implements Transformation {
         if (rotatedEgdes.isPresent()) {
             Quartet<GraphEdge, GraphEdge, GraphEdge, GraphEdge> edges = rotatedEgdes.get();
 
-            if (edges.getValue2().getL() > edges.getValue3().getL()) {
+            if (edges.getValue2().getL() > edges.getValue3().getL() || (edges.getValue2().getL() == edges.getValue3().getL() && edges.getValue2().getB())) {
                 return new Pair<>(new Triplet<>(rotatedTri.getValue1(), rotatedTri.getValue0(), rotatedTri.getValue2()),
                         new Quartet<>(edges.getValue1(), edges.getValue0(), edges.getValue3(), edges.getValue2()));
             } else {
@@ -110,9 +110,9 @@ public class TransformationP3 implements Transformation {
         //transformation process
         graph.removeInterior(interiorNode.getId());
         graph.deleteEdge(v1, v3);
-
+        VertexType type = v1v3.getB() ? VertexType.SIMPLE_NODE : VertexType.HANGING_NODE;
         Vertex insertedVertex = graph.insertVertex(interiorNode.getId(),
-                VertexType.SIMPLE_NODE,
+                type,
                 Point3d.middlePoint(v1.getCoordinates(), v3.getCoordinates()));
 
         String newEdge1Id = v1.getId().concat(insertedVertex.getId());
@@ -130,7 +130,7 @@ public class TransformationP3 implements Transformation {
 
         String insertedInterior1Id = v1.getId().concat(v2.getId()).concat(insertedVertex.getId());
         String insertedInterior2Id = v2.getId().concat(v3.getId()).concat(insertedVertex.getId());
-        graph.insertInterior(insertedInterior1Id, v1, v2, insertedVertex);
+        graph.insertInterior(insertedInterior1Id, v1, v2, insertedVertex, hangingNode);
         graph.insertInterior(insertedInterior2Id, v2, v3, insertedVertex);
 
         return graph;
