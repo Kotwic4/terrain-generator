@@ -6,12 +6,9 @@ import model.ModelGraph;
 import model.Vertex;
 import org.javatuples.Triplet;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TransformationP7 implements Transformation {
 

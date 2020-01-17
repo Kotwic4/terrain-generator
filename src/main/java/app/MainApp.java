@@ -6,8 +6,6 @@ import org.apache.log4j.Logger;
 import transformation.*;
 
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 public class MainApp {
 

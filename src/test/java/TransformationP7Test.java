@@ -3,7 +3,8 @@ import org.junit.Test;
 import transformation.Transformation;
 import transformation.TransformationP7;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransformationP7Test {
     private static final double EPS = 5.0f;
