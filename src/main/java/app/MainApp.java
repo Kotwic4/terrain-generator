@@ -3,11 +3,11 @@ package app;
 import model.*;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.javatuples.Pair;
-import processor.MapProcessingUtil;
 import transformation.*;
 
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MainApp {
 
@@ -33,42 +33,43 @@ public class MainApp {
         return graph;
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         BasicConfigurator.configure();
         ModelGraph graph = task();
         Transformation t1 = new TransformationP1();
         Transformation t2 = new TransformationP2();
-//        Transformation t3 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
+        Transformation t3 = new TransformationP3();
+//        Transformation t4 = new TransformationP4();
+//        Transformation t5 = new TransformationP5();
+//        Transformation t6 = new TransformationP6();
+        Transformation t7 = new TransformationP7(5.0f);
+
 //        log.info(String.format("Condition state for transformation P1: %b", t1.isConditionCompleted(graph, interiorNode)));
 
         graph.display();
 
-        for(int i = 0; i < 5; i++){
+        Transformation[] transformations = {t1, t2, t3};
+        for (int i = 0; i < 5; i++) {
             Collection<InteriorNode> interiorNodes = graph.getInteriors();
-            for(InteriorNode node: interiorNodes){
-                node.setPartitionRequired(true);
+            for (InteriorNode node : interiorNodes) {
+                t7.transformGraph(graph, node);
             }
-//            Collection<InteriorNode> interiorNodes = graph.getInteriors();
             boolean change = true;
-            while(change){
+            while (change) {
                 change = false;
-                for(InteriorNode node: interiorNodes){
-                    if(t1.isConditionCompleted(graph, node)){
-                        t1.transformGraph(graph,node);
-                        change = true;
-                        break;
-                    }
-                    if(t2.isConditionCompleted(graph, node)){
-                        t2.transformGraph(graph,node);
-                        change = true;
-                        break;
+                for (Transformation t : transformations) {
+                    interiorNodes = graph.getInteriors();
+                    for (InteriorNode node : interiorNodes) {
+                        if (t.isConditionCompleted(graph, node)) {
+                            t.transformGraph(graph, node);
+                            change = true;
+                            break;
+                        }
+
                     }
                 }
             }
-            Thread.sleep(3000l);
+//            Thread.sleep(300l);
 
 //            graph.display();
         }
