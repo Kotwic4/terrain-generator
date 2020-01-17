@@ -1,8 +1,10 @@
 package transformation;
 
 import model.*;
+import org.javatuples.Triplet;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,8 +19,18 @@ public class TransformationP7 implements Transformation {
 
     @Override
     public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
-        List<Double> vertexesZ = interiorNode.getAssociatedNodes().stream().map(e -> e.getCoordinates().getZ()).collect(Collectors.toList());
+        Triplet<Vertex, Vertex, Vertex> triangle = interiorNode.getTriangleVertexes();
+        List<Vertex> vertexList = new LinkedList<>();
+        vertexList.add(triangle.getValue0());
+        vertexList.add(triangle.getValue1());
+        vertexList.add(triangle.getValue2());
 
+        List<Double> vertexesZ = vertexList.stream().map(e -> e.getCoordinates().getZ()).collect(Collectors.toList());
+
+        System.out.println(vertexesZ);
+        if(vertexesZ.size() == 0){
+            return false;
+        }
         Double minZ = Collections.min(vertexesZ);
         Double maxZ = Collections.max(vertexesZ);
 
