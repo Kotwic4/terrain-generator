@@ -7,6 +7,7 @@ import org.javatuples.Pair;
 import processor.MapProcessingUtil;
 import transformation.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class MainApp {
@@ -36,14 +37,13 @@ public class MainApp {
     public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure();
         ModelGraph graph = task();
-        Transformation t1 = new TransformationP1();
-        Transformation t2 = new TransformationP2();
-//        Transformation t3 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
-//        log.info(String.format("Condition state for transformation P1: %b", t1.isConditionCompleted(graph, interiorNode)));
-
+        ArrayList<Transformation> transformations = new ArrayList<Transformation>();
+        transformations.add(new TransformationP1());
+        transformations.add(new TransformationP2());
+        transformations.add(new TransformationP3());
+        transformations.add(new TransformationP4());
+        transformations.add(new TransformationP5());
+        transformations.add(new TransformationP6());
         graph.display();
 
         for(int i = 0; i < 5; i++){
@@ -56,14 +56,20 @@ public class MainApp {
             while(change){
                 change = false;
                 for(InteriorNode node: interiorNodes){
-                    if(t1.isConditionCompleted(graph, node)){
-                        t1.transformGraph(graph,node);
-                        change = true;
-                        break;
+                    for(Transformation transformation: transformations){
+                        try{
+                            if(transformation.isConditionCompleted(graph, node)){
+                                transformation.transformGraph(graph,node);
+                                change = true;
+                                break;
+                            }
+                        }
+                        catch (Exception e){
+                            e.printStackTrace();
+                        }
+
                     }
-                    if(t2.isConditionCompleted(graph, node)){
-                        t2.transformGraph(graph,node);
-                        change = true;
+                    if(change){
                         break;
                     }
                 }
@@ -72,27 +78,5 @@ public class MainApp {
 
 //            graph.display();
         }
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-//        t1.transformGraph(graph, interiorNode);
-
-//        TerrainMap map = new TerrainMap();
-//        map.fillMapWithExampleData();
-//
-//        ModelGraph graph = new ModelGraph("testGraph");
-//        Vertex v1 = graph.insertVertex("v1", VertexType.SIMPLE_NODE, new Point3d(0.0, 0.0, 2.0));
-//        Vertex v2 = graph.insertVertex("v2", VertexType.SIMPLE_NODE, new Point3d(5.0, 0.0, 2.0));
-//        Vertex v3 = graph.insertVertex("v3", VertexType.HANGING_NODE, new Point3d(0.0, 3.0, 2.0));
-//        graph.insertEdge("e1", v1, v2, true);
-//        graph.insertEdge("e2", v2, v3, true);
-//        graph.insertEdge("e3", v3, v1, true);
-//        InteriorNode in1 = graph.insertInterior("i1", v1, v2, v3);
-//
-//        System.out.println(map.getAllPointsInTriangleArea(in1).size());
-//        System.out.println(MapProcessingUtil.calculateTerrainApproximationError(in1, map));
     }
 }
