@@ -91,6 +91,8 @@ public class MainApp {
         graph.insertEdge("e30", v13, v14, false);
         graph.insertEdge("e31", v14, v16, false);
         graph.insertEdge("e32", v14, v17, false);
+        graph.insertEdge("e33", v6, v12, false);
+        graph.insertEdge("e34", v11, v16, false);
 
 
 
