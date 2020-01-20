@@ -88,10 +88,13 @@ public class TransformationP2 implements Transformation {
         Vertex third = triangle.getValue2();
         Vertex hanging = getHangingVertexBetween(first, second, graph);
 
-        GraphEdge L1 = graph.getEdgeById(first.getEdgeBetween(hanging).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
-        GraphEdge L2 = graph.getEdgeById(hanging.getEdgeBetween(second).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
-        GraphEdge L3 = graph.getEdgeById(second.getEdgeBetween(third).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
-        GraphEdge L4 = graph.getEdgeById(third.getEdgeBetween(first).getId()).orElseThrow(()->new RuntimeException("Unknown edge id"));
+        GraphEdge L1 = graph.getEdgeBetweenNodes(first, hanging).orElse(null);
+        GraphEdge L2 = graph.getEdgeBetweenNodes(hanging, second).orElse(null);
+        GraphEdge L3 = graph.getEdgeBetweenNodes(second, third).orElse(null);
+        GraphEdge L4 = graph.getEdgeBetweenNodes(third, first).orElse(null);
+        if (L1 == null || L2 == null || L3 == null || L4 == null) {
+            return false;
+        }
 
         return (L1.getL() + L2.getL()) >= L3.getL() && (L1.getL() + L2.getL()) >= L4.getL();
     }
