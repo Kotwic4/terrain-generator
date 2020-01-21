@@ -38,10 +38,10 @@ public class MainApp {
         ModelGraph graph = task();
         Transformation t1 = new TransformationP1();
         Transformation t2 = new TransformationP2();
-//        Transformation t3 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
-//        Transformation t4 = new TransformationP1();
+        Transformation t3 = new TransformationP1();
+        Transformation t4 = new TransformationP4();
+        Transformation t5 = new TransformationP5();
+        Transformation t6 = new TransformationP6();
 //        log.info(String.format("Condition state for transformation P1: %b", t1.isConditionCompleted(graph, interiorNode)));
 
         graph.display();
@@ -63,6 +63,26 @@ public class MainApp {
                     }
                     if(t2.isConditionCompleted(graph, node)){
                         t2.transformGraph(graph,node);
+                        change = true;
+                        break;
+                    }
+                    if(t3.isConditionCompleted(graph, node)){
+                        t3.transformGraph(graph,node);
+                        change = true;
+                        break;
+                    }
+                    if(t4.isConditionCompleted(graph, node)){
+                        t4.transformGraph(graph,node);
+                        change = true;
+                        break;
+                    }
+                    if(t5.isConditionCompleted(graph, node)){
+                        t5.transformGraph(graph,node);
+                        change = true;
+                        break;
+                    }
+                    if(t6.isConditionCompleted(graph, node)){
+                        t6.transformGraph(graph,node);
                         change = true;
                         break;
                     }

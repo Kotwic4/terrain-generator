@@ -44,52 +44,46 @@ public class TransformationP4 implements Transformation {
 
         Vertex v0, v1, v2, v3, v4;
 
-        if(numberOfVertexesBetween(graph, v0p, v2p) == 1
+        if (numberOfVertexesBetween(graph, v0p, v2p) == 1
                 && numberOfVertexesBetween(graph, v0p, v4p) == 1
                 && numberOfVertexesBetween(graph, v2p, v4p) == 0) {
 
             v2 = v0p;
-            if(edgeLengthBetween(v2, v2p) < edgeLengthBetween(v2, v4p)){
+            if (edgeLengthBetween(v2, v2p) < edgeLengthBetween(v2, v4p)) {
                 v4 = v2p;
                 v0 = v4p;
-            }
-            else{
+            } else {
                 v4 = v4p;
                 v0 = v2p;
             }
-        }
-        else if(numberOfVertexesBetween(graph, v2p, v0p) == 1
+        } else if (numberOfVertexesBetween(graph, v2p, v0p) == 1
                 && numberOfVertexesBetween(graph, v2p, v4p) == 1
                 && numberOfVertexesBetween(graph, v0p, v4p) == 0) {
 
             v2 = v2p;
-            if(edgeLengthBetween(v2, v4p) < edgeLengthBetween(v2, v0p)){            //lub <= (???)        jedna krawedz nie moze byc krotsza od pozostalych inaczej wylatuje
+            if (edgeLengthBetween(v2, v4p) < edgeLengthBetween(v2, v0p)) {            //lub <= (???)        jedna krawedz nie moze byc krotsza od pozostalych inaczej wylatuje
                 v4 = v4p;
                 v0 = v0p;
-            }
-            else{
+            } else {
                 v4 = v0p;
                 v0 = v4p;
             }
-        }
-        else if(numberOfVertexesBetween(graph, v4p, v0p) == 1
+        } else if (numberOfVertexesBetween(graph, v4p, v0p) == 1
                 && numberOfVertexesBetween(graph, v4p, v2p) == 1
                 && numberOfVertexesBetween(graph, v0p, v2p) == 0) {
 
             v2 = v4p;
-            if(edgeLengthBetween(v2, v0p) < edgeLengthBetween(v2, v2p)){
+            if (edgeLengthBetween(v2, v0p) < edgeLengthBetween(v2, v2p)) {
                 v4 = v0p;
                 v0 = v2p;
-            }
-            else{
+            } else {
                 v4 = v2p;
                 v0 = v0p;
             }
 
-        }
-        else throw new InvalidProduction();
+        } else throw new InvalidProduction();
 
-        if(edgeLengthBetween(v0, v2) < edgeLengthBetween(v2, v4) || edgeLengthBetween(v0, v2) < edgeLengthBetween(v0, v4))
+        if (edgeLengthBetween(v0, v2) < edgeLengthBetween(v2, v4) || edgeLengthBetween(v0, v2) < edgeLengthBetween(v0, v4))
             throw new InvalidProduction();
 
         v1 = this.getMiddleVertex(graph, v0, v2);
@@ -157,17 +151,32 @@ public class TransformationP4 implements Transformation {
         return v1.getId().concat(v2.getId());
     }
 
+
     private boolean areCollinear(Vertex mid, Vertex begin, Vertex end) {
-        return areCollinear(mid.getXCoordinate(), mid.getYCoordinate(),
-                begin.getXCoordinate(), begin.getYCoordinate(), end.getXCoordinate(), end.getYCoordinate());
+        return areCollinear(mid.getXCoordinate(), mid.getYCoordinate(), mid.getZCoordinate(), begin.getXCoordinate(), begin.getYCoordinate(), begin.getZCoordinate(),
+                end.getXCoordinate(), end.getYCoordinate(), end.getZCoordinate());
     }
 
-    private boolean areCollinear(double x1, double y1, double x2, double y2, double x3, double y3) {
-        double a = x1 * (y2 - y3) +
-                x2 * (y3 - y1) +
-                x3 * (y1 - y2);
 
-        return a == 0;
+    private boolean areCollinear(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
+        double a1 = x2 - x1;
+        double a2 = y2 - y1;
+        double a3 = z2 - z1;
+
+        double b1 = x3 - x1;
+        double b2 = y3 - y1;
+        double b3 = z3 - z1;
+
+        return (a2 * b3 - a3 * b2) == 0 && (a3 * b1 - a1 * b3) == 0 && (a1 * b2 - a2 * b1) == 0;
+    }
+
+    public static  void main(String[] args){
+        TransformationP4 t = new TransformationP4();
+
+        Boolean b = t.areCollinear(-2, 3, 5, 1, 2, 3, 7, 0, -1);
+        System.out.println(b);
+
+
     }
 
 }
