@@ -1,73 +1,106 @@
-import model.*;
+import model.GraphEdge;
+import model.InteriorNode;
+import model.ModelGraph;
+import model.Point3d;
+import model.Vertex;
+import model.VertexType;
 import org.javatuples.Pair;
 import org.junit.Ignore;
 import org.junit.Test;
 import transformation.Transformation;
-import transformation.TransformationP4;
+import transformation.TransformationP5;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static transformation.TransformationP5.createGraph;
 
 public class TransformationP5Test extends AbstractTransformationTest {
 
-    //todo Change P4 to P5 once it's implemented
+    private Transformation transformation = new TransformationP5();
 
-    private Transformation transformation = new TransformationP4();
+    @Test
+    public void testGraphShouldBeCorrectlyTransformed() {
+        ModelGraph graph = createGraph();
+        assertTrue(transformation.isConditionCompleted(graph, graph.getInterior("i9").get()));
+        List<Vertex> vertices = new LinkedList<>(graph.getVertices());
 
-    @Ignore @Test
+        List<InteriorNode> interiors = new LinkedList<>(graph.getInteriors());
+
+        interiors.forEach(interior -> transformation.transformGraph(graph, interior));
+
+        assertEquals(vertices.size() + 1, graph.getVertices().size());
+        assertEquals(interiors.size() + 1, graph.getInteriors().size());
+    }
+
+    @Ignore
+    @Test
     public void conditionPassesWithObtuseTriangle() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         assertTrue(transformation.isConditionCompleted(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)));
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesTwoInteriorNodes() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         assertEquals(2, transformation.transformGraph(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)).getInteriors().size());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void conditionFailsWithAcuteTriangle() {
         ModelGraph graph = createAcuteTriangleGraph(true);
         assertFalse(transformation.isConditionCompleted(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)));
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void conditionFailsWhenPartitioningIsNotNeeded() {
         ModelGraph graph = createObtuseTriangleGraph(false);
         assertFalse(transformation.isConditionCompleted(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)));
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void conditionFailsWithRightTriangle() {
         ModelGraph graph = createRightTriangleGraph(true);
         assertFalse(transformation.isConditionCompleted(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)));
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void conditionFailsWithIsoscelesTriangle() {
         ModelGraph graph = createIsoscelesTriangleGraph(true);
         assertFalse(transformation.isConditionCompleted(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)));
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void conditionFailsWithoutBorderEdges() {
         ModelGraph graph = createInternalObtuseTriangleGraph(true);
         assertFalse(transformation.isConditionCompleted(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)));
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void conditionFailsWithImproperBorderEdges() {
         ModelGraph graph = createSemiInternalObtuseTriangleGraph(true);
         assertFalse(transformation.isConditionCompleted(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)));
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesOneNewVertex() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         assertEquals(4, transformation.transformGraph(graph, graph.getInterior("i1").orElseThrow(AssertionError::new)).getVertices().size());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesOneNewSimpleVertex() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);
@@ -75,7 +108,8 @@ public class TransformationP5Test extends AbstractTransformationTest {
         assertEquals(VertexType.SIMPLE_NODE, graph.getVertex(interior.getId()).orElseThrow(AssertionError::new).getVertexType());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesTheNewVertexOnTheEdge() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);
@@ -86,7 +120,8 @@ public class TransformationP5Test extends AbstractTransformationTest {
         assertEquals(Point3d.middlePoint(v1.getCoordinates(), v3.getCoordinates()), newVertex.getCoordinates());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesNewInteriorNodesWithCorrectParams() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);
@@ -99,7 +134,8 @@ public class TransformationP5Test extends AbstractTransformationTest {
     }
 
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesNewEdges() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);
@@ -108,7 +144,8 @@ public class TransformationP5Test extends AbstractTransformationTest {
         assertEquals(12, transformed.getEdges().size());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesNewOppositeEdgesWithCorrectParams() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);
@@ -124,7 +161,8 @@ public class TransformationP5Test extends AbstractTransformationTest {
         assertTrue(opposite1.getB() == opposite2.getB() == oldOpposite.getB());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesNewOppositeEdgesWithCorrectLength() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);
@@ -140,7 +178,8 @@ public class TransformationP5Test extends AbstractTransformationTest {
         assertEquals(oldOpposite.getL(), opposite1.getL() + opposite2.getL());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesNewInternalEdgeWithCorrectParams() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);
@@ -152,7 +191,8 @@ public class TransformationP5Test extends AbstractTransformationTest {
         assertFalse(internalEdge.getB());
     }
 
-    @Ignore @Test
+    @Ignore
+    @Test
     public void transformationProducesNewInternalEdgeWithCorrectLength() {
         ModelGraph graph = createObtuseTriangleGraph(true);
         InteriorNode interior = graph.getInterior("i1").orElseThrow(AssertionError::new);

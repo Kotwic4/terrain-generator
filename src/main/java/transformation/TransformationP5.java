@@ -1,130 +1,241 @@
 package transformation;
 
-import model.*;
+import model.GraphEdge;
+import model.InteriorNode;
+import model.ModelGraph;
+import model.Point3d;
+import model.Vertex;
+import model.VertexType;
+import org.apache.log4j.BasicConfigurator;
 import org.javatuples.Triplet;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public class TransformationP5 implements Transformation {
 
     @Override
     public boolean isConditionCompleted(ModelGraph graph, InteriorNode interiorNode) {
-        Triplet<Vertex, Vertex, Vertex> triangle = getOrderedTriage(interiorNode.getTriangleVertexes(), graph);
-        Triplet<Vertex, Vertex, Vertex> triangle2 = getOrderedTriage2(triangle, graph);
+        List<Vertex> hangingNodes = interiorNode.getAssociatedNodes();
+        Triplet<Vertex, Vertex, Vertex> triangle = interiorNode.getTriangleVertexes();
 
-        return areAllVertexType(triangle2) &&
-                isTransformationConditionFulfilled(graph, triangle2);
-    }
+        if (getSimpleVertexCount(triangle) != 3 || hangingNodes.size() != 2) {
+            return false;
+        }
 
-    private Triplet<Vertex, Vertex, Vertex> getOrderedTriage2(Triplet<Vertex, Vertex, Vertex> triangle, ModelGraph graph) {
-        GraphEdge E1 = graph.getEdgeBetweenNodes(triangle.getValue0(), triangle.getValue2()).orElseThrow(() -> new RuntimeException("Edge not found"));
-        GraphEdge E2 = graph.getEdgeBetweenNodes(triangle.getValue1(), triangle.getValue2()).orElseThrow(() -> new RuntimeException("Edge not found"));
+        Vertex hangingNode1 = graph.getVertexBetween(triangle.getValue0(), triangle.getValue1()).orElse(null);
+        Vertex hangingNode2 = graph.getVertexBetween(triangle.getValue0(), triangle.getValue2()).orElse(null);
+        Vertex hangingNode3 = graph.getVertexBetween(triangle.getValue1(), triangle.getValue2()).orElse(null);
 
+        double noHangingNodeEdge = 0.0;
+        double edge1Length = 0.0;
+        double edge2Length = 0.0;
+        double edge3Length = 0.0;
 
-        return E1.getL() > E2.getL()
-                ? triangle
-                : new Triplet<>(triangle.getValue1(), triangle.getValue0(), triangle.getValue2());
-    }
+        if (hangingNode1 == null) {
+            noHangingNodeEdge = getLengthOfEdgeBetween(graph, triangle.getValue0(), triangle.getValue1());
+        } else {
+            edge1Length = getLengthOfEdgeBetween(graph, hangingNode1, triangle.getValue0()) +
+                          getLengthOfEdgeBetween(graph, hangingNode1, triangle.getValue1());
+        }
 
-    private boolean isTransformationConditionFulfilled(ModelGraph graph, Triplet<Vertex, Vertex, Vertex> triangle) {
-        Vertex v1 = triangle.getValue0();
-        Vertex v2 = triangle.getValue1();
-        Vertex v3 = triangle.getValue2();
-        Vertex h4 = getHangingVertexBetween(v1, v2, graph);
+        if (hangingNode2 == null) {
+            noHangingNodeEdge = getLengthOfEdgeBetween(graph, triangle.getValue0(), triangle.getValue2());
+        } else {
+            edge2Length = getLengthOfEdgeBetween(graph, hangingNode2, triangle.getValue0()) +
+                          getLengthOfEdgeBetween(graph, hangingNode2, triangle.getValue2());
+        }
 
-        GraphEdge L1 = getEdgeBetween(graph, v1, h4);
-        GraphEdge L2 = getEdgeBetween(graph, h4, v2);
-        GraphEdge L3 = getEdgeBetween(graph, v2, v3);
-        GraphEdge L4 = getEdgeBetween(graph, v3, v1);
+        if (hangingNode3 == null) {
+            noHangingNodeEdge = getLengthOfEdgeBetween(graph, triangle.getValue1(), triangle.getValue2());
+        } else {
+            edge3Length = getLengthOfEdgeBetween(graph, hangingNode3, triangle.getValue1()) +
+                          getLengthOfEdgeBetween(graph, hangingNode3, triangle.getValue2());
+        }
 
-        final double eps = .0001;
-        return (!L4.getB() &&
-                (L4.getL() > (L1.getL() + L2.getL())) &&
-                (L4.getL() >= L3.getL()) &&
-                !(L3.getB() && (Math.abs(L3.getL() - L4.getL()) < eps)));
-    }
+        System.out.println("Edge length: " + "e1: " + edge1Length + ", e2: " + edge2Length + ", e3: " + edge3Length + ", noHanging: " + noHangingNodeEdge);
 
-    private GraphEdge getEdgeBetween(ModelGraph graph, Vertex v1, Vertex v2) {
-        return graph.getEdgeById(v1.getEdgeBetween(v2).getId()).orElseThrow(() -> new RuntimeException("Unknown edge id"));
+        return edge1Length < noHangingNodeEdge && edge2Length < noHangingNodeEdge && edge3Length < noHangingNodeEdge;
     }
 
     @Override
     public ModelGraph transformGraph(ModelGraph graph, InteriorNode interiorNode) {
-        if (!isConditionCompleted(graph, interiorNode)) {
-            return graph;
+        if (this.isConditionCompleted(graph, interiorNode)) {
+            Vertex v2 = getNodeToSplit(graph, interiorNode);
+            Vertex v4 = getNotSplittableNode(graph, interiorNode);
+
+            Vertex v3 = graph.getVertexBetween(v2, v4).orElse(null);
+            Vertex[] vertexCandidates = triangleToList(interiorNode.getTriangle());
+            Vertex v1 = null;
+            Vertex v5 = null;
+
+            for (Vertex vertex : vertexCandidates) {
+                if (vertex != v3 && graph.getEdgeBetweenNodes(v2, vertex).isPresent()) {
+                    v1 = vertex;
+                }
+                System.out.println(vertex);
+                if (vertex != v3 && v4.hasEdgeBetween(vertex)) {
+                    v5 = vertex;
+                }
+            }
+
+            System.out.println(v1 + ", " + v2 + ", " + v3 + ", " + v4 + ", " + v5);
+
+            graph.removeInterior(interiorNode.getId());
+            graph.removeEdge(v1, v5);
+
+            Vertex newVertex = graph.insertVertex("new1",
+                                                  VertexType.SIMPLE_NODE,
+                                                  new Point3d((v1.getXCoordinate() + v5.getXCoordinate()) / 2, (v1.getYCoordinate() + v5.getYCoordinate()) / 2, 0.0));
+            insertEdgeBetween(v1, graph, newVertex, interiorNode.getId() + "v1");
+            insertEdgeBetween(v5, graph, newVertex, interiorNode.getId() + "v5");
+            insertEdgeBetween(v3, graph, newVertex, interiorNode.getId() + "v3");
+
+            InteriorNode i1 = graph.insertInterior(interiorNode.getId() + "i1", v1, v3, newVertex, v2);
+            InteriorNode i2 = graph.insertInterior(interiorNode.getId() + "i2", v3, newVertex, v5, v4);
+
+            i1.setPartitionRequired(true);
+            i2.setPartitionRequired(true);
         }
+        return graph;
+    }
 
-        Triplet<Vertex, Vertex, Vertex> trianglePre = getOrderedTriage(interiorNode.getTriangleVertexes(), graph);
-        Triplet<Vertex, Vertex, Vertex> triangle = getOrderedTriage2(trianglePre, graph);
+    private double getLengthOfEdgeBetween(ModelGraph graph, Vertex value0, Vertex value1) {
+        return graph.getEdgeBetweenNodes(value0, value1).get().getL();
+    }
 
-        Vertex v1 = triangle.getValue0();
-        Vertex v2 = triangle.getValue1();
-        Vertex v3 = triangle.getValue2();
-        Vertex h4 = getHangingVertexBetween(v1, v2, graph);
 
-        GraphEdge v1_h4 = getEdgeBetween(graph, v1, h4);
-        GraphEdge h4_v2 = getEdgeBetween(graph, h4, v2);
-        GraphEdge v2_v3 = getEdgeBetween(graph, v2, v3);
-        GraphEdge v3_v1 = getEdgeBetween(graph, v3, v1);
+    private double getEdgeLength(ModelGraph graph, InteriorNode interiorNode, Vertex vertex) {
+        double sum = 0;
+        Triplet<Vertex, Vertex, Vertex> triangle = interiorNode.getTriangle();
+        Vertex[] nodes = triangleToList(triangle);
 
-        // remove old
-        graph.removeInterior(interiorNode.getId());
-        graph.removeEdge(v1, v3);
+        for (Vertex node : nodes) {
+            if (node.hasEdgeBetween(vertex)) {
+                GraphEdge edge = graph.getEdgeBetweenNodes(node, vertex).orElse(null);
+                if (edge != null) {
+                    sum += edge.getL();
+                }
+            }
+        }
+        System.out.println(sum);
+        return sum;
+    }
 
-        // new vertex
-        Vertex h5 = graph.insertVertex(interiorNode.getId(),
-                VertexType.HANGING_NODE,
-                Point3d.middlePoint(v1.getCoordinates(), v3.getCoordinates()));
+    private Vertex getNodeToSplit(ModelGraph graph, InteriorNode interiorNode) {
+        Vertex bestFit = null;
+        double bestFitSum = 0.0;
 
-        // new edges
-        addEdgeBetween(graph, v1, h5, v3_v1.getB());
-        addEdgeBetween(graph, h5, v3, v3_v1.getB());
-        addEdgeBetween(graph, h5, v2, false);
+        for (Vertex candidate : interiorNode.getAssociatedNodes()) {
+            double edge = getEdgeLength(graph, interiorNode, candidate);
+            if (edge > bestFitSum) {
+                bestFit = candidate;
+                bestFitSum = edge;
+            }
+        }
+        return bestFit;
+    }
 
-        // new interior
-        String leftInteriorId = v1.getId().concat(v2.getId()).concat(h5.getId());
-        InteriorNode left = graph.insertInterior(leftInteriorId, v1, v2, h5);
-        left.setPartitionRequired(false);
+    private Vertex getNotSplittableNode(ModelGraph graph, InteriorNode interiorNode) {
+        List<Vertex> candidates = interiorNode.getAssociatedNodes();
+        Vertex bestFit = getNodeToSplit(graph, interiorNode);
+        for (Vertex vertex : candidates) {
+            if (vertex != bestFit) {
+                return vertex;
+            }
+        }
+        throw new RuntimeException();
+    }
 
-        String rightInteriorId = h5.getId().concat(v2.getId()).concat(v3.getId());
-        InteriorNode right = graph.insertInterior(rightInteriorId, h5, v2, v3);
-        right.setPartitionRequired(false);
+    private Vertex[] triangleToList(Triplet<Vertex, Vertex, Vertex> triangle) {
+        return new Vertex[]{triangle.getValue0(), triangle.getValue1(), triangle.getValue2()};
+    }
+
+    private static int getSimpleVertexCount(Triplet<Vertex, Vertex, Vertex> triangle) {
+        int count = 0;
+        for (Object o : triangle) {
+            Vertex v = (Vertex) o;
+            if (v.getVertexType() == VertexType.SIMPLE_NODE) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static ModelGraph createGraph() {
+        ModelGraph graph = new ModelGraph("test");
+        int vertexId = 1;
+        Vertex v1 = insertSimpleVertexWithId(vertexId++, graph, 0.0, 100.0, 0.0);
+        Vertex v2 = insertSimpleVertexWithId(vertexId++, graph, 0.0, 0.0, 0.0);
+        Vertex v3 = insertSimpleVertexWithId(vertexId++, graph, 50.0, 50.0, 0.0);
+        Vertex v4 = insertSimpleVertexWithId(vertexId++, graph, 100.0, 100.0, 0.0);
+        Vertex v5 = insertSimpleVertexWithId(vertexId++, graph, 100.0, 50.0, 0.0);
+        Vertex v6 = insertSimpleVertexWithId(vertexId++, graph, 100.0, 0.0, 0.0);
+        Vertex v7 = insertSimpleVertexWithId(vertexId++, graph, 150.0, 50.0, 0.0);
+        Vertex v8 = insertSimpleVertexWithId(vertexId++, graph, 200.0, 0.0, 0.0);
+        Vertex v9 = insertSimpleVertexWithId(vertexId++, graph, 250.0, 50.0, 0.0);
+        Vertex v10 = insertSimpleVertexWithId(vertexId++, graph, 300.0, 100.0, 0.0);
+        Vertex v11 = insertSimpleVertexWithId(vertexId, graph, 300.0, 0.0, 0.0);
+
+        insertEdgeBetween(v1, graph, v4, "e1");
+        insertEdgeBetween(v4, graph, v10, "e2");
+        insertEdgeBetween(v10, graph, v11, "e3");
+        insertEdgeBetween(v11, graph, v8, "e4");
+        insertEdgeBetween(v8, graph, v6, "e5");
+        insertEdgeBetween(v6, graph, v2, "e6");
+        insertEdgeBetween(v2, graph, v1, "e7");
+        insertEdgeBetween(v1, graph, v3, "e8");
+        insertEdgeBetween(v3, graph, v6, "e9");
+        insertEdgeBetween(v2, graph, v3, "e10");
+        insertEdgeBetween(v4, graph, v7, "e11");
+        insertEdgeBetween(v5, graph, v7, "e12");
+        insertEdgeBetween(v6, graph, v7, "e13");
+        insertEdgeBetween(v7, graph, v8, "e14");
+        insertEdgeBetween(v8, graph, v9, "e15");
+        insertEdgeBetween(v9, graph, v10, "e16");
+        insertEdgeBetween(v9, graph, v11, "e17");
+        insertEdgeBetween(v5, graph, v6, "e18");
+        insertEdgeBetween(v4, graph, v5, "e19");
+
+        graph.insertInterior("i1", v1, v2, v3);
+        graph.insertInterior("i2", v1, v4, v6, v3, v5);
+        graph.insertInterior("i3", v2, v3, v6);
+        graph.insertInterior("i4", v4, v5, v7);
+        graph.insertInterior("i5", v5, v6, v7);
+        graph.insertInterior("i6", v6, v7, v8);
+        graph.insertInterior("i7", v8, v9, v11);
+        graph.insertInterior("i8", v9, v10, v11);
+        graph.insertInterior("i9", v4, v8, v10, v7, v9);
 
         return graph;
     }
 
-    private void addEdgeBetween(ModelGraph graph, Vertex v1, Vertex h6, boolean b) {
-        String edgeId = v1.getId().concat(h6.getId());
-        graph.insertEdge(edgeId, v1, h6, b);
+    private static void insertEdgeBetween(Vertex v1, ModelGraph graph, Vertex v4, String e1) {
+        graph.insertEdge(e1, v1, v4, false);
     }
 
-    private Triplet<Vertex, Vertex, Vertex> getOrderedTriage(Triplet<Vertex, Vertex, Vertex> v, ModelGraph graph) {
-        if (getHangingVertexBetweenOp(v.getValue0(), v.getValue1(), graph).isPresent()) {
-            return v;
-        } else if (getHangingVertexBetweenOp(v.getValue2(), v.getValue0(), graph).isPresent()) {
-            return new Triplet<>(v.getValue2(), v.getValue0(), v.getValue1());
-        } else if (getHangingVertexBetweenOp(v.getValue1(), v.getValue2(), graph).isPresent()) {
-            return new Triplet<>(v.getValue1(), v.getValue2(), v.getValue0());
-        }
-        throw new RuntimeException("Configuration with hanging vertex between 2 vertexes was not found");
+    private static Vertex insertSimpleVertexWithId(int id, ModelGraph graph, double x, double y, double z) {
+        return graph.insertVertex("v" + id, VertexType.SIMPLE_NODE, new Point3d(x, y, z));
     }
 
-    private Optional<Vertex> getHangingVertexBetweenOp(Vertex v1, Vertex v2, ModelGraph graph) {
-        List<Vertex> between = graph.getVertexesBetween(v1, v2);
+    public static void main(String[] args) throws InterruptedException {
+        BasicConfigurator.configure();
+        Transformation transformationP5 = new TransformationP5();
+        ModelGraph graph = createGraph();
+        graph.display();
 
-        return between.stream().filter(e -> e.getVertexType() == VertexType.HANGING_NODE).findAny();
-    }
+        System.out.println("Displaying graph before applying transformation.");
+        Thread.sleep(5000);
+        System.out.println("Applying transformation...");
 
-    private Vertex getHangingVertexBetween(Vertex v1, Vertex v2, ModelGraph graph) {
-        return getHangingVertexBetweenOp(v1, v2, graph)
-                .orElseThrow(() -> new RuntimeException("Hanging vertex between " + v1.getId() + " and " + v2.getId() + " not found"));
-    }
+        List<InteriorNode> interiors = new LinkedList<>(graph.getInteriors());
 
-    private boolean areAllVertexType(Triplet<Vertex, Vertex, Vertex> triangle) {
-        return triangle.toList().stream().map(e -> {
-            Vertex v = (Vertex) e;
-            return v.getVertexType() == VertexType.SIMPLE_NODE;
-        }).reduce(true, (acc, e) -> acc && e);
+        interiors.forEach(node -> {
+            if (transformationP5.isConditionCompleted(graph, node)) {
+                System.out.println("Interior " + node.getId() + " can be split.");
+                transformationP5.transformGraph(graph, node);
+            }
+        });
+
     }
 }
